@@ -5,8 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons'
 
 import Profile from './src/screens/Profile';
-import Planner from './src/screens/Planner';
-import Timetable from './src/screens/Timetable';
+import Planner from './src/screens/ActivitynPlanner';
+import TimeTable from './src/screens/TimeTable';
 import Dashboard from './src/screens/Dashboard';
 
 const Tap = createBottomTabNavigator()
@@ -19,7 +19,7 @@ export default function App() {
           let iconName;
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline'
-          } else if (route.name === 'Timetable') {
+          } else if (route.name === 'TimeTable') {
             iconName = focused ? 'time' : 'time-outline'
           } else if (route.name === 'Planner') {
             iconName = focused ? 'newspaper' : 'newspaper-outline'
@@ -50,9 +50,9 @@ export default function App() {
           options={{ title: 'Home' }}
         />
         <Tap.Screen
-          name='Timetable'
-          component={Timetable}
-          options={{ title: 'Timetable' }}
+          name='TimeTable'
+          component={TimeTable}
+          options={{ title: 'TimeTable' }}
         />
         <Tap.Screen
           name='Planner'
