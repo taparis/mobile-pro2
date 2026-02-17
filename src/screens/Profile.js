@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
@@ -16,7 +16,10 @@ const Profile = () => {
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity 
+                style={styles.button}
+                onPress={() => navigation.navigate('EditProfile')}
+            >
                 <Text style={styles.buttonText}>
                     Edit Profile
                 </Text>
