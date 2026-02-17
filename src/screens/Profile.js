@@ -6,7 +6,7 @@ const Profile = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
-                <Image source={{ uri: 'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg' }}
+                <Image source={{ uri: 'https://img.freepik.com/premium-vector/anthropologist-vector-character-flat-style_1033579-57866.jpg' }}
                     style={styles.images}></Image>
                 <View style={styles.textContainer}>
                     <Text style={styles.nameText}>John Jee</Text>
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     },
     images: {
         width: 80,
-        height: 100,
+        height: 80,
         borderWidth: 2,
         borderRadius: 75,
         borderColor: '#ffffffff',
