@@ -10,6 +10,9 @@ import Planner from './src/screens/ActivitynPlanner';
 import TimeTable from './src/screens/TimeTable';
 import Dashboard from './src/screens/Dashboard';
 import EditProfile from './src/screens/EditProfile';
+import DetailClass from './src/screens/DetailClass';
+import ExamClass from './src/screens/ExamClass';
+import AddClass from './src/screens/AddClass';
 
 const Tap = createBottomTabNavigator()
 
@@ -24,6 +27,7 @@ const ProfileStackNavigator = () => {
         },
         headerTintColor: 'black',
       }}
+
     >
       <Stack.Screen
         name="Profile"
@@ -38,6 +42,56 @@ const ProfileStackNavigator = () => {
     </Stack.Navigator>
   )
 }
+
+const TimeTableStack  = createNativeStackNavigator()
+
+const TimeTableStackNavigator = () => {
+  return (
+    <TimeTableStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: 'pink',
+        },
+        headerTintColor: 'black',
+      }}
+    >
+      <TimeTableStack.Screen
+        name="TimeTable"
+        component={TimeTable}
+        options={{ title: 'TimeTable' }}
+      />
+      <TimeTableStack.Screen
+        name="DetailClass"
+        component={DetailClass}
+        options={({ navigation }) => ({
+            title: 'Detail Class',
+            headerRight: () => (
+              <TouchableOpacity 
+              onPress={() => navigation.navigate('AddClass')}
+              style={{ }}
+              >
+                <Ionicons name="add-outline" size={28} color="black" />
+              </TouchableOpacity>
+            )
+          })}
+
+      />
+      <TimeTableStack.Screen
+        name="ExamClass"
+        component={ExamClass}
+        options={{ title: 'Detail Exam' }}
+      />
+      <TimeTableStack.Screen
+        name="AddClass"
+        component={AddClass}
+        options={{ title: 'Add Class' }}
+      />
+
+      
+    </TimeTableStack.Navigator>
+  )
+}
+
 
 export default function App() {
   return (
@@ -79,8 +133,8 @@ export default function App() {
         />
         <Tap.Screen
           name='TimeTable'
-          component={TimeTable}
-          options={{ title: 'TimeTable' }}
+          component={TimeTableStackNavigator}
+          options={{ headerShown: false }}
         />
         <Tap.Screen
           name='Planner'
