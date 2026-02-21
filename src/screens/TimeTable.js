@@ -1,102 +1,126 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useContext } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
+import React, { act, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from "react-native";
 
 const TimeTable = ({ navigation }) => {
+  const [activeTab, setActiveTab] = useState("class");
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.buttonSchedule}>
-                <TouchableOpacity 
-                    style={styles.classButton}
-                    onPress={() => {}}
-                >
-                    <Text style={styles.buttonClassText}>
-                        Class Schedule
-                    </Text>
-                </TouchableOpacity>
-             
+  return (
+    <View style={styles.container}>
+      <View style={styles.buttonSchedule}>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === "class" && styles.activeTab]}
+          onPress={() => setActiveTab("class")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "class" && styles.activeTabText,
+            ]}
+          >
+            Class Schedule
+          </Text>
+        </TouchableOpacity>
 
-                <TouchableOpacity 
-                    style={styles.examButton}
-                    onPress={() => navigation.navigate('ExamClass')}
-                >
-                    <Text style={styles.buttonExamText}>
-                        Exam Schedule
-                    </Text>
-                </TouchableOpacity>
-            </View>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === "exam" && styles.activeTab]}
+          onPress={() => setActiveTab("exam")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "exam" && styles.activeTabText,
+            ]}
+          >
+            Exam Schedule
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-            <View style={styles.titleRow}>
-                <Text style={styles.classText}>Class Schedule</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.classText}>
+          {activeTab === "class" ? "Class Schedule" : "Exam Schedule"}
+        </Text>
 
-                <TouchableOpacity onPress={() => navigation.navigate('DetailClass')}>
-                    <Ionicons name="create-outline" size={40} color="black" />
-                </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate(
+              activeTab === "class" ? "DetailClass" : "DetailExam",
+            )
+          }
+        >
+          <Ionicons name="create-outline" size={40} color="black" />
+        </TouchableOpacity>
+      </View>
 
-            </View>
-        
-
-        </View>
-    )
-}
+      {activeTab === "class" ? (
+        <Text style={styles.placeholder}>ตารางเรียน</Text>
+    ) :(
+        <Text style={styles.placeholder}>ตารางสอบ</Text>
+    )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'column',
-        backgroundColor: '#fff',
-        alignItems: 'center',
-    },
-    buttonSchedule: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 15,
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  buttonSchedule: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
 
-    },
-    classButton: {
-        width: '50%',
-        padding: 10,
-        marginTop: 15,
-        backgroundColor: '#ff68b9',
-        borderRadius: 60,
-        alignItems: 'center',
-    },
-    examButton: {
-        width: '50%',
-        padding: 10,
-        marginTop: 15,
-        backgroundColor: 'pink',
-        borderRadius: 60,
-        marginLeft: 5,
-        alignItems: 'center'
-    },
-    buttonClassText: {
-        padding: 10,
-        fontSize: 18,
-        color: 'white',
-        fontWeight: 'bold'
-    },
-    buttonExamText: {
-        padding: 10,
-        fontSize: 18,
-        color: 'black',
-    },
-    classText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginTop: 20,
-        alignSelf: 'flex-start',
-        marginLeft: 15
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 10,
-        justifyContent: 'space-between',
-        width: '90%',
-    },
-})
+  },
+  tabButton: {
+    width: "50%",
+    padding: 15,
+    marginTop: 15,
+    backgroundColor: "pink",
+    borderRadius: 60,
+    alignItems: "center",
+    marginLeft: 5
+  },
+  tabText: {
+    fontSize: 18,
+    color: "#000",
+    fontWeight: "bold",
+    
+  },
+  activeTab: {
+    backgroundColor: "#FF5C8A",
+  },
+  activeTabText: {
+    color: "white",
+    fontWeight: "bold",
+   
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    justifyContent: "space-between",
+    width: "90%",
+  },
+  classText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  placeholder: {
+    marginTop: 30,
+    textAlign: "center",
+    color: "#302e2e",
+  },
+});
 
-export default TimeTable
+export default TimeTable;
