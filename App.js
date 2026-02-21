@@ -1,15 +1,97 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from '@expo/vector-icons'
 
 import Profile from './src/screens/Profile';
-import Planner from './src/screens/Planner';
-import Timetable from './src/screens/Timetable';
+import Planner from './src/screens/ActivitynPlanner';
+import TimeTable from './src/screens/TimeTable';
 import Dashboard from './src/screens/Dashboard';
+import EditProfile from './src/screens/EditProfile';
+import DetailClass from './src/screens/DetailClass';
+import ExamClass from './src/screens/ExamClass';
+import AddClass from './src/screens/AddClass';
 
 const Tap = createBottomTabNavigator()
+
+const Stack = createNativeStackNavigator()
+
+const ProfileStackNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: 'pink',
+        },
+        headerTintColor: 'black',
+      }}
+
+    >
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{ title: 'Profile' }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{ title: 'Edit Profile' }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+const TimeTableStack  = createNativeStackNavigator()
+
+const TimeTableStackNavigator = () => {
+  return (
+    <TimeTableStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: 'pink',
+        },
+        headerTintColor: 'black',
+      }}
+    >
+      <TimeTableStack.Screen
+        name="TimeTable"
+        component={TimeTable}
+        options={{ title: 'TimeTable' }}
+      />
+      <TimeTableStack.Screen
+        name="DetailClass"
+        component={DetailClass}
+        options={({ navigation }) => ({
+            title: 'Detail Class',
+            headerRight: () => (
+              <TouchableOpacity 
+              onPress={() => navigation.navigate('AddClass')}
+              style={{ }}
+              >
+                <Ionicons name="add-outline" size={28} color="black" />
+              </TouchableOpacity>
+            )
+          })}
+
+      />
+      <TimeTableStack.Screen
+        name="ExamClass"
+        component={ExamClass}
+        options={{ title: 'Detail Exam' }}
+      />
+      <TimeTableStack.Screen
+        name="AddClass"
+        component={AddClass}
+        options={{ title: 'Add Class' }}
+      />
+
+      
+    </TimeTableStack.Navigator>
+  )
+}
+
 
 export default function App() {
   return (
@@ -19,7 +101,7 @@ export default function App() {
           let iconName;
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline'
-          } else if (route.name === 'Timetable') {
+          } else if (route.name === 'TimeTable') {
             iconName = focused ? 'time' : 'time-outline'
           } else if (route.name === 'Planner') {
             iconName = focused ? 'newspaper' : 'newspaper-outline'
@@ -47,12 +129,12 @@ export default function App() {
         <Tap.Screen
           name='Dashboard'
           component={Dashboard}
-          options={{ title: 'Dashboard' }}
+          options={{ title: 'Home' }}
         />
         <Tap.Screen
-          name='Timetable'
-          component={Timetable}
-          options={{ title: 'Timetable' }}
+          name='TimeTable'
+          component={TimeTableStackNavigator}
+          options={{ headerShown: false }}
         />
         <Tap.Screen
           name='Planner'
@@ -61,8 +143,8 @@ export default function App() {
         />
         <Tap.Screen
           name='Profile'
-          component={Profile}
-          options={{ title: 'Profile' }}
+          component={ProfileStackNavigator}
+          options={{ headerShown: false }}
         />
       </Tap.Navigator>
     </NavigationContainer>
