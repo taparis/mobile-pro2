@@ -154,7 +154,9 @@ export default function App() {
         <Tab.Screen
           name="Dashboard"
           component={Dashboard}
-          options={{ title: "Home" }}
+          options={{ title: 'Dashboard' , headerShown : true ,
+             headerTitleStyle : {fontWeight : 'bold', fontSize : 30},
+            headerTitleContainerStyle : {left : 8}}}
         />
         <Tab.Screen
           name="TimeTable"
