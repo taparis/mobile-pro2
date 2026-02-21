@@ -129,7 +129,9 @@ export default function App() {
         <Tap.Screen
           name='Dashboard'
           component={Dashboard}
-          options={{ title: 'Home' }}
+          options={{ title: 'Dashboard' , headerShown : true ,
+             headerTitleStyle : {fontWeight : 'bold', fontSize : 30},
+            headerTitleContainerStyle : {left : 8}}}
         />
         <Tap.Screen
           name='TimeTable'
