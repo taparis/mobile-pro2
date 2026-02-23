@@ -2,20 +2,15 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
-const SelectFormInput = ({
-  label,
-  value,
-  onValueChange,
-  placeholder,
-  options = []
-}) => {
+const SelectFormInput = ({ label, value, onValueChange, placeholder, options = [] }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
-      <View style={styles.pickerWrapper}>
+      <View style={styles.pickerBorder}>
         <Picker
           selectedValue={value}
           onValueChange={onValueChange}
+          dropdownIconColor="pink"
         >
           <Picker.Item label={placeholder} value="" />
           {options.map((item, index) => (
@@ -33,13 +28,18 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 5,
   },
-  pickerWrapper: {
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    overflow: "hidden",
+  pickerBorder: {
+    borderWidth: 2,
+    borderColor: 'pink',
+    borderRadius: 10,
+    paddingHorizontal: 13,
+    width: '100%',
+    fontSize: 16,
+    marginBottom: 5,
+    backgroundColor: 'white'
   },
 });
 

@@ -22,6 +22,9 @@ import AddClass from "./src/screens/AddClass";
 import EditClass from "./src/screens/EditClass";
 import DetailExam from "./src/screens/DetailExam";
 import { ClassProvider } from "./src/context/ClassContext";
+import Register from "./src/screens/Register";
+import Login from "./src/screens/Login";
+import { UserProvider } from './src/context/UserContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -38,7 +41,7 @@ const ProfileStackNavigator = () => {
       }}
     >
       <Stack.Screen
-        name="Profile"
+        name="ProfileHome"
         component={Profile}
         options={{ title: "Profile" }}
       />
@@ -76,7 +79,7 @@ const TimeTableStackNavigator = () => {
             title: "Detail Class",
             headerRight: () => (
               <TouchableOpacity
-                onPress={() => navigation.navigate("AddClass", {type: "class"})}
+                onPress={() => navigation.navigate("AddClass", { type: "class" })}
                 style={{}}
               >
                 <Ionicons name="add-outline" size={28} color="black" />
@@ -116,9 +119,10 @@ const TimeTableStackNavigator = () => {
   );
 };
 
-export default function App() {
+const MainTabStack = createNativeStackNavigator();
+
+const MainTab = () => {
   return (
-    <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
@@ -154,9 +158,11 @@ export default function App() {
         <Tab.Screen
           name="Dashboard"
           component={Dashboard}
-          options={{ title: 'Dashboard' , headerShown : true ,
-             headerTitleStyle : {fontWeight : 'bold', fontSize : 30},
-            headerTitleContainerStyle : {left : 8}}}
+          options={{
+            title: 'Dashboard', headerShown: true,
+            headerTitleStyle: { fontWeight: 'bold', fontSize: 30 },
+            headerTitleContainerStyle: { left: 8 }
+          }}
         />
         <Tab.Screen
           name="TimeTable"
@@ -174,7 +180,39 @@ export default function App() {
           options={{ headerShown: false }}
         />
       </Tab.Navigator>
+  );
+}
+
+export default function App() {
+  return (
+    <UserProvider>
+    <NavigationContainer>
+      <MainTabStack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "pink",
+          },
+          headerTintColor: "black",
+        }}
+      >
+        <MainTabStack.Screen
+          name="Register"
+          component={Register}
+          options={{ title: "Register" }}
+        />
+        <MainTabStack.Screen
+          name="Login"
+          component={Login}
+          options={{ title: "Login" }}
+        />
+        <MainTabStack.Screen
+          name="MainTab"
+          component={MainTab}
+          options={{ headerShown: false }}
+        />
+      </MainTabStack.Navigator>
     </NavigationContainer>
+    </UserProvider>
   );
 }
 

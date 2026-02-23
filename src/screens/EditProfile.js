@@ -1,72 +1,150 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { UserContext } from "../context/UserContext";
+import * as ImagePicker from 'expo-image-picker'
 import TextFormInput from "../components/TextFormInput";
 import SelectFormInput from "../components/SelectFormInput";
 
-const EditProfile = () => {
+const EditProfile = ({ navigation }) => {
 
-    const [name, setName] = useState("");
-    const [surname, setSurname] = useState("");
-    const [faculty, setFaculty] = useState("");
-    const [branch, setBranch] = useState("");
-    const [year, setYear] = useState("");
+    const { user, dispatch } = useContext(UserContext);
+
+    const [form, setForm] = useState({
+        name: '',
+        faculty: '',
+        major: '',
+        year: '',
+        image: null
+    });
+
+    const FACULTIES = {
+        "Agriculture": [
+            "Entomology",
+            "Farm Mechanics",
+            "Soil Science",
+            "Plant Pathology",
+            "Agronomy",
+            "Horticulture",
+            "Animal Science",
+            "Agricultural Extension and Communication",
+            "Agricultural Biotechnology"
+        ],
+        "Engineering": [
+            "Agricultural Engineering",
+            "Irrigation Engineering",
+            "Food Engineering",
+            "Civil Engineering",
+            "Mechanical Engineering",
+            "Computer Engineering",
+            "Industrial Engineering"
+        ],
+        "Sports Science": [
+            "Sports Science",
+            "Health and Movement Sciences",
+            "Sport and Health Management"
+        ],
+        "Liberal Arts and Science": [
+            "Science and Bioinnovation",
+            "Physical and Material Sciences",
+            "Computational Science and Digital Technology",
+            "Business Administration and Accountancy",
+            "Language Sciences and Cultures",
+            "Social Sciences"
+        ],
+        "Education and Development Sciences": [
+            "Human and Community Resource Development (HCRD)",
+            "Teacher Education",
+            "Physical Education and Sports"
+        ]
+    };
+
+    useEffect(() => {
+        setForm({
+            name: user.name || '',
+            faculty: user.faculty || '',
+            major: user.major || '',
+            year: user.year || '',
+            image: user.image || null,
+        });
+    }, [user]);
+
+    const handleRegister = () => {
+        dispatch({
+            type: "UPDATE_USER",
+            payload: form,
+        });
+        navigation.goBack();
+    };
+
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5
+        })
+
+        if (!result.canceled) setForm({ ...form, image: result.assets[0].uri })
+    }
 
     return (
         <View style={styles.container}>
-            <Image source={{ uri: 'https://img.freepik.com/premium-vector/anthropologist-vector-character-flat-style_1033579-57866.jpg' }}
-                style={styles.images}>
-            </Image>
+            <TouchableOpacity
+                onPress={pickImage}
+                style={styles.imageBtn}
+            >
+                <View style={styles.imageContainer}>
+                    {form.image ?
+                        <Image source={{ uri: form.image }} style={styles.images} /> :
+                        <Ionicons name='person' size={40} color={'#ccc'} />
+                    }
+                </View>
+            </TouchableOpacity>
             <View style={styles.inputContainer}>
                 <Text style={styles.title}>Edit Profile</Text>
                 <TextFormInput
-                    label="Name"
-                    value={name}
-                    placeholder="John"
-                    onChangeText={setName}
+                    label="Fullname"
+                    value={form.name}
+                    placeholder="Please enter your fullname"
+                    onChangeText={(text) => setForm({ ...form, name: text })}
                 />
-                <TextFormInput
-                    label="Surname"
-                    value={surname}
-                    placeholder="Jee"
-                    onChangeText={setSurname}
-                />
+
                 <SelectFormInput
                     label="Faculty"
-                    value={faculty}
-                    placeholder="Liberal Arts and Sciences"
-                    onValueChange={setFaculty}
-                    options={[
-                        "Liberal Arts and Sciences",
-                        "Engineering",
-                        "Science"
-                    ]}
+                    value={form.faculty}
+                    placeholder="Please select your faculty"
+                    onValueChange={(value) => setForm({ ...form, faculty: value })}
+                    options={Object.keys(FACULTIES)}
                 />
+
                 <SelectFormInput
-                    label="Branch"
-                    value={branch}
-                    placeholder="Computer Science"
-                    onValueChange={setBranch}
-                    options={[
-                        "Computer Science",
-                    ]}
+                    label="Major"
+                    value={form.major}
+                    placeholder="Please select your major"
+                    onValueChange={(value) => setForm({ ...form, major: value })}
+                    options={form.faculty ? FACULTIES[form.faculty] : []}
                 />
+
                 <SelectFormInput
                     label="Year"
-                    value={year}
-                    placeholder="3"
-                    onValueChange={setYear}
+                    value={form.year}
+                    placeholder="Please select your year"
+                    onValueChange={(value) => setForm({ ...form, year: value })}
                     options={["1", "2", "3", "4"]}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                    <TouchableOpacity style={styles.cancelButton}>
-                        <Text style={styles.cancelButtonText}>
-                            Cancel
-                        </Text>
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.summitButton}>
-                        <Text style={styles.summitButtonText}>
-                            Summit
-                        </Text>
+                    <TouchableOpacity
+                        style={styles.summitButton}
+                        onPress={handleRegister}
+                    >
+                        <Text style={styles.summitButtonText}>Submit</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -82,12 +160,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     images: {
-        width: 80,
-        height: 80,
+        width: 100,
+        height: 100,
         borderWidth: 2,
         borderRadius: 75,
         borderColor: '#ffffffff',
         marginTop: 20
+    },
+    imageContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 75,
+        margin: 10,
+        justifyContent: "center",
+        alignItems: "center",
     },
     title: {
         fontSize: 20,
