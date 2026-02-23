@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import Profile from "./src/screens/Profile";
 import Planner from "./src/screens/ActivitynPlanner";
-import TimeTable from "./src/screens/TimeTable";
+import TimeTable from "./src/screens/Timetable";
 import Dashboard from "./src/screens/Dashboard";
 import EditProfile from "./src/screens/EditProfile";
 import DetailClass from "./src/screens/DetailClass";
