@@ -39,7 +39,7 @@ const TimeTable = ({ navigation }) => {
 
         </View>
     )
-}
+}   
 
 const styles = StyleSheet.create({
     container: {
