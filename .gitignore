@@ -42,3 +42,7 @@ yarn-error.*
 
 
 .expo-shared/
+
+# ignore package files
+package.json
+package-lock.json
