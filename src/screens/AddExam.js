@@ -12,10 +12,8 @@ import {
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
-const AddClass = ({ navigation, route }) => {
+const AddExam = ({ navigation, route }) => {
   const { dispatch } = useContext(ClassContext);
-
-  const type = route?.params?.type || "class";
 
   const initialForm = {
     subject: "",
@@ -24,13 +22,13 @@ const AddClass = ({ navigation, route }) => {
     date: null,
     starts: null,
     ends: null,
-    type,
+    type: "exam",
   }
 
   const [form, setForm] = useState(initialForm);
 
   const handleSubmit = () => {
-    dispatch({ type: "ADD_CLASS", payload: { ...form, type: "exam" } });
+    dispatch({ type: "ADD_CLASS", payload: form });
     navigation.goBack();
   };
 
@@ -93,7 +91,7 @@ const AddClass = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Text style={styles.title}>Add Class</Text>
+        <Text style={styles.title}>Add Exam</Text>
 
         <View style={styles.form}>
           <Text style={styles.label}>Subject</Text>
@@ -121,13 +119,13 @@ const AddClass = ({ navigation, route }) => {
           />
 
           <Text style={styles.label}>Date</Text>
-          <TouchableOpacity
-            style={[styles.input, styles.fakeDateInput]}
+          <TouchableOpacity 
+            style={[styles.input, styles.fakeDateInput]} 
             onPress={showDatePicker}>
             <Text style={[
-              styles.fakeInputText,
+              styles.fakeInputText, 
               form.date && styles.filledText
-            ]}>
+              ]}>
               {form.date ? formatDate(form.date) : "Select date"}
             </Text>
           </TouchableOpacity>
@@ -231,21 +229,21 @@ const styles = StyleSheet.create({
   },
   fakeDateInput: {
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#fff", 
     borderRadius: 12,
   },
   fakeTimeInput: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#fff", 
     borderRadius: 12,
   },
   fakeInputText: {
-    color: "#817b7b",
+    color: "#817b7b", 
   },
   filledText: {
     color: "#000000"
   }
 });
 
-export default AddClass;
+export default AddExam;

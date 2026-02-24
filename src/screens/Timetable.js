@@ -112,9 +112,10 @@ const TimeTable = ({ navigation }) => {
           ]}
           onPress={() => setMode("class")}
         >
-          <Text style={styles.buttonClassText}>Class Schedule</Text>
+          <Text style={styles.buttonClassText}>Class Schedule</Text>   
+          
         </TouchableOpacity>
-
+        
         <TouchableOpacity
           style={[
             styles.examButton,
@@ -123,6 +124,7 @@ const TimeTable = ({ navigation }) => {
           onPress={() => setMode("exam")}
         >
           <Text style={styles.buttonExamText}>Exam Schedule</Text>
+          
         </TouchableOpacity>
       </View>
 
@@ -135,11 +137,13 @@ const TimeTable = ({ navigation }) => {
 
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate("AddClass", { type: mode })
+              navigation.navigate("DetailClass")
             }
           >
             <Ionicons name="add-outline" size={28} color="black" />
           </TouchableOpacity>
+
+          
         </View>
 
         {/* TABLE */}
