@@ -46,14 +46,14 @@ const TimeTable = ({ navigation }) => {
   // ======================
 
   const classData = classes.filter(
-    (i) => i.type !== "exam" && i.date && i.starts && i.ends
+    (i) => i.type !== "exams" && i.date && i.starts && i.ends
   );
 
   const examData = classes.filter(
-    (i) => i.type === "exam" && i.date && i.starts && i.ends
+    (i) => i.type === "exams" && i.date && i.starts && i.ends
   );
 
-  const displayData = mode === "exam" ? examData : classData;
+  const displayData = mode === "exams" ? examData : classData;
 
   // ======================
   // render parts
@@ -112,19 +112,19 @@ const TimeTable = ({ navigation }) => {
           ]}
           onPress={() => setMode("class")}
         >
-          <Text style={styles.buttonClassText}>Class Schedule</Text>   
-          
+          <Text style={styles.buttonClassText}>Class Schedule</Text>
+
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.examButton,
-            mode === "exam" && styles.activeButton,
+            mode === "exams" && styles.activeButton,
           ]}
-          onPress={() => setMode("exam")}
+          onPress={() => setMode("exams")}
         >
           <Text style={styles.buttonExamText}>Exam Schedule</Text>
-          
+
         </TouchableOpacity>
       </View>
 
@@ -132,18 +132,20 @@ const TimeTable = ({ navigation }) => {
       <View style={styles.titleRow}>
         <View style={styles.headerRow}>
           <Text style={styles.classText}>
-            {mode === "exam" ? "Exam Schedule" : "Class Schedule"}
+            {mode === "exams" ? "Exam Schedule" : "Class Schedule"}
           </Text>
 
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate("DetailClass")
+              navigation.navigate(
+                mode === "exams" ? "DetailExam" : "DetailClass"
+              )
             }
           >
             <Ionicons name="add-outline" size={28} color="black" />
           </TouchableOpacity>
 
-          
+
         </View>
 
         {/* TABLE */}

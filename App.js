@@ -21,6 +21,8 @@ import DetailClass from "./src/screens/DetailClass";
 import AddClass from "./src/screens/AddClass";
 import EditClass from "./src/screens/EditClass";
 import DetailExam from "./src/screens/DetailExam";
+import AddExam from "./src/screens/AddExam";
+import EditExam from "./src/screens/EditExam"
 import { ClassProvider } from "./src/context/ClassContext";
 import Register from "./src/screens/Register";
 import Login from "./src/screens/Login";
@@ -95,7 +97,7 @@ const TimeTableStackNavigator = () => {
             title: "Detail Exam",
             headerRight: () => (
               <TouchableOpacity
-                onPress={() => navigation.navigate("EditClass")}
+                onPress={() => navigation.navigate("EditExam")}
                 style={{}}
               >
                 <Ionicons name="add-outline" size={28} color="black" />
@@ -113,6 +115,16 @@ const TimeTableStackNavigator = () => {
           name="AddClass"
           component={AddClass}
           options={{ title: "Add Class" }}
+        />
+        <TimeTableStack.Screen
+          name="EditExam"
+          component={EditExam}
+          options={{ title: "Edit Exam" }}
+        />
+        <TimeTableStack.Screen
+          name="AddExam"
+          component={AddExam}
+          options={{ title: "Add Exam" }}
         />
       </TimeTableStack.Navigator>
     </ClassProvider>

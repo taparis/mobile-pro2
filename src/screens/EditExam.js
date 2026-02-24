@@ -12,40 +12,28 @@ import {
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
-const AddExam = ({ navigation, route }) => {
+const EditClass = ({ navigation, route }) => {
   const { dispatch } = useContext(ClassContext);
-  const editItem = route.params?.item;
 
-  const initialForm = {
-    subject: "",
-    code: "",
-    room: "",
-    date: null,
-    starts: null,
-    ends: null,
-    type: "exams",
+  const item = route?.params?.item;
+
+  if (!item) {
+    return (
+      <View>
+        <Text>ไม่พบข้อมูล</Text>
+      </View>
+    );
   }
 
-  const [form, setForm] = useState(editItem || initialForm);
+  const [form, setForm] = useState(item);
+
   const handleSubmit = () => {
-
-    if (editItem) {
-      dispatch({
-        type: "UPDATE_CLASS",
-        payload: form,
-      });
-    } else {
-      dispatch({
-        type: "ADD_CLASS",
-        payload: form,
-      });
-    }
-
+    dispatch({ type: "UPDATE_EXAM", payload: form });
     navigation.goBack();
   };
 
   const handleCancel = () => {
-    setForm(initialForm);
+    navigation.goBack();
   };
 
   const showDatePicker = () => {
@@ -103,15 +91,12 @@ const AddExam = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Text style={styles.title}>
-          {editItem ? "Edit Exam" : "Add Exam"}
-        </Text>
+        <Text style={styles.title}>Add Class</Text>
 
         <View style={styles.form}>
           <Text style={styles.label}>Subject</Text>
           <TextInput
             style={styles.input}
-            placeholder="Subject"
             value={form.subject}
             onChangeText={(t) => setForm({ ...form, subject: t })}
           />
@@ -119,7 +104,6 @@ const AddExam = ({ navigation, route }) => {
           <Text style={styles.label}>Code</Text>
           <TextInput
             style={styles.input}
-            placeholder="Code"
             value={form.code}
             onChangeText={(t) => setForm({ ...form, code: t })}
           />
@@ -127,7 +111,6 @@ const AddExam = ({ navigation, route }) => {
           <Text style={styles.label}>Room</Text>
           <TextInput
             style={styles.input}
-            placeholder="Room"
             value={form.room}
             onChangeText={(t) => setForm({ ...form, room: t })}
           />
@@ -135,11 +118,11 @@ const AddExam = ({ navigation, route }) => {
           <Text style={styles.label}>Date</Text>
           <TouchableOpacity
             style={[styles.input, styles.fakeDateInput]}
-            onPress={showDatePicker}>
-            <Text style={[
-              styles.fakeInputText,
-              form.date && styles.filledText
-            ]}>
+            onPress={showDatePicker}
+          >
+            <Text
+              style={[styles.fakeInputText, form.date && styles.filledText]}
+            >
               {form.date ? formatDate(form.date) : "Select date"}
             </Text>
           </TouchableOpacity>
@@ -256,8 +239,8 @@ const styles = StyleSheet.create({
     color: "#817b7b",
   },
   filledText: {
-    color: "#000000"
-  }
+    color: "#000000",
+  },
 });
 
-export default AddExam;
+export default EditClass;

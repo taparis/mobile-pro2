@@ -51,21 +51,21 @@ const DetailClass = ({ navigation }) => {
 
   const { classes } = useContext(ClassContext);
 
-  const sortedClasses = [...classes].sort((a, b) => {
-    if (!a.date) return 1;
-    if (!b.date) return -1;
+  const sortedClasses = classes
+    .filter((i) => i.type !== "exams")
+    .sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
 
-    const dayA = new Date(a.date).getDay();
-    const dayB = new Date(b.date).getDay();
+      const dayA = new Date(a.date).getDay();
+      const dayB = new Date(b.date).getDay();
 
+      if (dayA !== dayB) {
+        return dayA - dayB;
+      }
 
-    if (dayA !== dayB) {
-      return dayA - dayB;
-    }
-
-
-    return new Date(a.starts) - new Date(b.starts);
-  });
+      return new Date(a.starts) - new Date(b.starts);
+    });
 
 
 
@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 20,
     padding: 10,
-    alignItems: "flex-start", 
-    justifyContent: "center", 
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   date: {
     fontWeight: "bold",

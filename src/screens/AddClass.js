@@ -30,7 +30,7 @@ const AddClass = ({ navigation, route }) => {
   const [form, setForm] = useState(initialForm);
 
   const handleSubmit = () => {
-    dispatch({ type: "ADD_CLASS", payload: { ...form, type: "exam" } });
+    dispatch({ type: "ADD_CLASS", payload: { ...form, type: "class" } });
     navigation.goBack();
   };
 
