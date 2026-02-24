@@ -195,16 +195,16 @@ export default function App() {
           headerTintColor: "black",
         }}
       >
-        <MainTabStack.Screen
+        {/* <MainTabStack.Screen
           name="Register"
           component={Register}
           options={{ title: "Register" }}
-        />
-        <MainTabStack.Screen
+        /> */}
+        {/* <MainTabStack.Screen
           name="Login"
           component={Login}
           options={{ title: "Login" }}
-        />
+        /> */}
         <MainTabStack.Screen
           name="MainTab"
           component={MainTab}
