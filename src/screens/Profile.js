@@ -1,22 +1,37 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
+import { UserContext } from "../context/UserContext";
+import { Ionicons } from "@expo/vector-icons";
 
 const Profile = ({ navigation }) => {
+
+    const { user } = useContext(UserContext);
+
+    const handleDeleteData = () => {
+        Alert.alert("Delete All Data", "Do you want to delete all the data?",
+            [{ text: "Cancel" }, { text: "Confirm" }],
+            { cancelable: true }
+        );
+    };
 
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
-                <Image source={{ uri: 'https://img.freepik.com/premium-vector/anthropologist-vector-character-flat-style_1033579-57866.jpg' }}
-                    style={styles.images}></Image>
+                <View style={styles.imageContainer}>
+                    {user.image ?
+                        <Image source={{ uri: user.image }} style={styles.images} /> :
+                        <Ionicons name='person' size={40} color={'#ccc'} />
+                    }
+                </View>
                 <View style={styles.textContainer}>
-                    <Text style={styles.nameText}>John Jee</Text>
-                    <Text style={styles.FacultyText}>Faculty of Liberal Arts and Sciences</Text>
-                    <Text>Computer Science</Text>
-                    <Text>Year 3</Text>
+                    <Text style={styles.nameText}>{user.name}</Text>
+                    <Text style={styles.FacultyText}>{user.faculty}</Text>
+                    <Text>{user.major}</Text>
+                    <Text>Year {user.year}</Text>
                 </View>
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate('EditProfile')}
             >
@@ -25,7 +40,10 @@ const Profile = ({ navigation }) => {
                 </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={handleDeleteData}
+            >
                 <Text style={styles.buttonText}>
                     Delete All Data !
                 </Text>
@@ -49,10 +67,16 @@ const styles = StyleSheet.create({
     images: {
         width: 80,
         height: 80,
-        borderWidth: 2,
         borderRadius: 75,
-        borderColor: '#ffffffff',
         marginBottom: 5
+    },
+    imageContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 75,
+        marginBottom: 5,
+        justifyContent: "center",
+        alignItems: "center",
     },
     nameText: {
         fontSize: 20,

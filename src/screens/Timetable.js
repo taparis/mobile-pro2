@@ -164,17 +164,16 @@ const TimeTable = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'column',
-        backgroundColor: '#fff',
-        alignItems: 'center',
-    },
-    buttonSchedule: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 15,
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  buttonSchedule: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
 
     },
     classButton: {
