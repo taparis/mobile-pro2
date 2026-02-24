@@ -15,7 +15,10 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 const AddClass = ({ navigation, route }) => {
   const { dispatch } = useContext(ClassContext);
 
-  const type = route?.params?.type ?? "class";
+  dispatch({
+    type: "ADD_CLASS",
+    payload: { ...form, type }
+  });
 
   const initialForm = {
     subject: "",
@@ -121,13 +124,13 @@ const AddClass = ({ navigation, route }) => {
           />
 
           <Text style={styles.label}>Date</Text>
-          <TouchableOpacity 
-            style={[styles.input, styles.fakeDateInput]} 
+          <TouchableOpacity
+            style={[styles.input, styles.fakeDateInput]}
             onPress={showDatePicker}>
             <Text style={[
-              styles.fakeInputText, 
+              styles.fakeInputText,
               form.date && styles.filledText
-              ]}>
+            ]}>
               {form.date ? formatDate(form.date) : "Select date"}
             </Text>
           </TouchableOpacity>
@@ -231,17 +234,17 @@ const styles = StyleSheet.create({
   },
   fakeDateInput: {
     justifyContent: "center",
-    backgroundColor: "#fff", 
+    backgroundColor: "#fff",
     borderRadius: 12,
   },
   fakeTimeInput: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#fff", 
+    backgroundColor: "#fff",
     borderRadius: 12,
   },
   fakeInputText: {
-    color: "#817b7b", 
+    color: "#817b7b",
   },
   filledText: {
     color: "#000000"

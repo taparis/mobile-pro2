@@ -87,6 +87,9 @@ const TimeTable = ({ navigation }) => {
         ));
     };
 
+    const classOnly = classes.filter(
+        item => item.type !== "exam"
+    );
     return (
         <View style={styles.container}>
             <View style={styles.buttonSchedule}>
@@ -102,17 +105,18 @@ const TimeTable = ({ navigation }) => {
 
                 <TouchableOpacity
                     style={styles.examButton}
-                    onPress={() => navigation.navigate('ExamClass')}
+                    onPress={() => navigation.navigate('DetailExam')}
                 >
+
                     <Text style={styles.buttonExamText}>
                         Exam Schedule
                     </Text>
+                    <Ionicons name="create-outline" size={28} color="black" />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.titleRow}>
 
-                {/* 🔥 header row */}
                 <View style={styles.headerRow}>
                     <Text style={styles.classText}>Class Schedule</Text>
 
@@ -129,7 +133,8 @@ const TimeTable = ({ navigation }) => {
                     <View style={styles.gridArea}>
                         {renderHourLines()}
                         {renderDayColumns()}
-                        {classes.map((item, index) => {
+
+                        {classOnly.map((item, index) => {
                             const left =
                                 TIME_WIDTH + getDayIndex(item.date) * DAY_WIDTH;
 
@@ -164,16 +169,16 @@ const TimeTable = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#fff",
-    alignItems: "center",
-  },
-  buttonSchedule: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 15,
+    container: {
+        flex: 1,
+        flexDirection: "column",
+        backgroundColor: "#fff",
+        alignItems: "center",
+    },
+    buttonSchedule: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingHorizontal: 15,
 
     },
     classButton: {
