@@ -285,5 +285,5 @@ const styles = StyleSheet.create({
         width: "100%",
     },
 })
-//main
+
 export default TimeTable
