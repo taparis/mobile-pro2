@@ -14,13 +14,9 @@ const HOUR_HEIGHT = 40;
 const TimeTable = ({ navigation }) => {
   const { classes } = useContext(ClassContext);
 
-  // ⭐ mode switch
   const [mode, setMode] = useState("class");
 
-  // ======================
   // helpers
-  // ======================
-
   const getDayIndex = (date) => {
     if (!date) return 0;
 
@@ -55,9 +51,7 @@ const TimeTable = ({ navigation }) => {
 
   const displayData = mode === "exams" ? examData : classData;
 
-  // ======================
   // render parts
-  // ======================
 
   const renderDayHeader = () => (
     <View style={styles.dayHeaderRow}>
@@ -97,9 +91,7 @@ const TimeTable = ({ navigation }) => {
       />
     ));
 
-  // ======================
   // UI
-  // ======================
 
   return (
     <View style={styles.container}>
