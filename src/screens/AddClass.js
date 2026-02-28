@@ -6,16 +6,27 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  Image,
-  Button,
 } from "react-native";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
-const AddClass = ({ navigation, route }) => {
-  const { dispatch } = useContext(ClassContext);
+// ตรวจสอบว่าวันในสัปดาห์ตรงกัน
+const isSameWeekDay = (dateA, dateB) => {
+  if (!dateA || !dateB) return false;
+  return new Date(dateA).getDay() === new Date(dateB).getDay();
+};
 
-  const type = route?.params?.type || "class";
+// ตรวจสอบช่วงเวลาทับซ้อน
+const isTimeOverlap = (startsA, endsA, startsB, endsB) => {
+  const s1 = new Date(startsA).getTime();
+  const e1 = new Date(endsA).getTime();
+  const s2 = new Date(startsB).getTime();
+  const e2 = new Date(endsB).getTime();
+  return s1 < e2 && s2 < e1;
+};
+
+const AddClass = ({ navigation }) => {
+  const { classes, dispatch } = useContext(ClassContext);
 
   const initialForm = {
     subject: "",
@@ -24,27 +35,57 @@ const AddClass = ({ navigation, route }) => {
     date: null,
     starts: null,
     ends: null,
-    type,
-  }
+    type: "class",
+  };
 
   const [form, setForm] = useState(initialForm);
 
+  const checkConflict = () => {
+    if (!form.date || !form.starts || !form.ends) return null;
+    return classes
+      .filter((c) => c.type !== "exams" && c.date && c.starts && c.ends)
+      .find(
+        (c) =>
+          isSameWeekDay(form.date, c.date) &&
+          isTimeOverlap(form.starts, form.ends, c.starts, c.ends)
+      );
+  };
+
   const handleSubmit = () => {
-    dispatch({ type: "ADD_CLASS", payload: { ...form, type: "class" } });
+    if (!form.subject || !form.code) {
+      Alert.alert("ข้อมูลไม่ครบ", "กรุณากรอก Subject และ Code");
+      return;
+    }
+    if (!form.date || !form.starts || !form.ends) {
+      Alert.alert("ข้อมูลไม่ครบ", "กรุณาเลือกวันและเวลา");
+      return;
+    }
+    if (new Date(form.starts) >= new Date(form.ends)) {
+      Alert.alert("เวลาไม่ถูกต้อง", "เวลาเริ่มต้องน้อยกว่าเวลาสิ้นสุด");
+      return;
+    }
+
+    const conflict = checkConflict();
+    if (conflict) {
+      Alert.alert(
+        "เวลาชนกัน!",
+        `วิชา "${conflict.subject}" (${formatTime(conflict.starts)} - ${formatTime(conflict.ends)}) ถูกลงเรียนในช่วงเวลานี้แล้ว`,
+        [{ text: "ตกลง" }]
+      );
+      return;
+    }
+
+    dispatch({ type: "ADD_CLASS", payload: form });
     navigation.goBack();
   };
 
-  const handleCancel = () => {
-    setForm(initialForm);
-  };
+  const handleCancel = () => navigation.goBack();
 
   const showDatePicker = () => {
     DateTimePickerAndroid.open({
       value: form.date || new Date(),
       onChange: (event, selectedDate) => {
-        if (selectedDate) {
-          setForm({ ...form, date: selectedDate });
-        }
+        if (selectedDate) setForm({ ...form, date: selectedDate });
       },
       mode: "date",
       is24Hour: true,
@@ -55,9 +96,7 @@ const AddClass = ({ navigation, route }) => {
     DateTimePickerAndroid.open({
       value: form.starts || new Date(),
       onChange: (event, selectedTime) => {
-        if (selectedTime) {
-          setForm({ ...form, starts: selectedTime });
-        }
+        if (selectedTime) setForm({ ...form, starts: selectedTime });
       },
       mode: "time",
       is24Hour: true,
@@ -66,11 +105,9 @@ const AddClass = ({ navigation, route }) => {
 
   const showEndTimePicker = () => {
     DateTimePickerAndroid.open({
-      value: form.starts || new Date(),
+      value: form.ends || new Date(),
       onChange: (event, selectedTime) => {
-        if (selectedTime) {
-          setForm({ ...form, ends: selectedTime });
-        }
+        if (selectedTime) setForm({ ...form, ends: selectedTime });
       },
       mode: "time",
       is24Hour: true,
@@ -78,95 +115,86 @@ const AddClass = ({ navigation, route }) => {
   };
 
   const formatDate = (date) => {
-    if (!date) return "Select date";
+    if (!date) return "เลือกวัน";
     return date.toLocaleDateString("th-TH");
   };
 
   const formatTime = (time) => {
     if (!time) return "--:--";
-    return time.toLocaleTimeString("th-TH", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return new Date(time).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
   };
+
+  const conflict = checkConflict();
 
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <Text style={styles.title}>Add Class</Text>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Subject</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Subject"
-            value={form.subject}
-            onChangeText={(t) => setForm({ ...form, subject: t })}
-          />
+        <Text style={styles.label}>Subject</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="ชื่อวิชา"
+          value={form.subject}
+          onChangeText={(t) => setForm({ ...form, subject: t })}
+        />
 
-          <Text style={styles.label}>Code</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Code"
-            value={form.code}
-            onChangeText={(t) => setForm({ ...form, code: t })}
-          />
+        <Text style={styles.label}>Code</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="รหัสวิชา"
+          value={form.code}
+          onChangeText={(t) => setForm({ ...form, code: t })}
+        />
 
-          <Text style={styles.label}>Room</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Room"
-            value={form.room}
-            onChangeText={(t) => setForm({ ...form, room: t })}
-          />
+        <Text style={styles.label}>Room</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="ห้องเรียน"
+          value={form.room}
+          onChangeText={(t) => setForm({ ...form, room: t })}
+        />
 
-          <Text style={styles.label}>Date</Text>
-          <TouchableOpacity
-            style={[styles.input, styles.fakeDateInput]}
-            onPress={showDatePicker}>
-            <Text style={[
-              styles.fakeInputText,
-              form.date && styles.filledText
-            ]}>
-              {form.date ? formatDate(form.date) : "Select date"}
+        <Text style={styles.label}>Date</Text>
+        <TouchableOpacity style={[styles.input, styles.fakeInput]} onPress={showDatePicker}>
+          <Text style={[styles.fakeInputText, form.date && styles.filledText]}>
+            {formatDate(form.date)}
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.label}>Time</Text>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity style={[styles.input, styles.fakeTimeInput]} onPress={showStartTimePicker}>
+            <Text style={[styles.fakeInputText, form.starts && styles.filledText]}>
+              {form.starts ? formatTime(form.starts) : "เริ่ม"}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.input, styles.fakeTimeInput]} onPress={showEndTimePicker}>
+            <Text style={[styles.fakeInputText, form.ends && styles.filledText]}>
+              {form.ends ? formatTime(form.ends) : "สิ้นสุด"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-          <Text style={styles.label}>Time</Text>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <TouchableOpacity
-              style={[styles.input, styles.fakeTimeInput]}
-              onPress={showStartTimePicker}
-            >
-              <Text style={styles.fakeInputText}>
-                {form.starts ? formatTime(form.starts) : "Starts time"}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.input, styles.fakeTimeInput]}
-              onPress={showEndTimePicker}
-            >
-              <Text style={styles.fakeInputText}>
-                {form.ends ? formatTime(form.ends) : "Ends time"}
-              </Text>
-            </TouchableOpacity>
+        {/* แสดง warning เวลาชนแบบ real-time */}
+        {conflict && (
+          <View style={styles.conflictBanner}>
+            <Text style={styles.conflictText}>
+              ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)} - {formatTime(conflict.ends)})
+            </Text>
           </View>
+        )}
 
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleCancel}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.summitButton}
-              onPress={handleSubmit}
-            >
-              <Text style={styles.summitButtonText}>Summit</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{ flexDirection: "row", justifyContent: "center", gap: 12 }}>
+          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitButton, conflict && styles.disabledButton]}
+            onPress={handleSubmit}
+          >
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -174,78 +202,41 @@ const AddClass = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#fff",
-    alignItems: "center",
-  },
-  input: {
-    backgroundColor: "#ffffff",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
+  container: { flex: 1, backgroundColor: "#fff", alignItems: "center" },
   inputContainer: {
     padding: 20,
     backgroundColor: "pink",
-    width: "80%",
+    width: "85%",
     borderRadius: 30,
     marginTop: 20,
   },
+  title: { fontSize: 20, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
+  label: { fontSize: 15, marginBottom: 5 },
+  input: { backgroundColor: "#fff", padding: 12, borderRadius: 12, marginBottom: 12 },
+  fakeInput: { justifyContent: "center" },
+  fakeTimeInput: { flex: 1, justifyContent: "center", marginBottom: 12 },
+  fakeInputText: { color: "#aaa" },
+  filledText: { color: "#000" },
+  conflictBanner: {
+    backgroundColor: "#fff3f3",
+    borderWidth: 1,
+    borderColor: "#ff3776",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  conflictText: { color: "#ff3776", fontSize: 13, fontWeight: "500" },
   cancelButton: {
-    width: "40%",
-    padding: 10,
-    marginTop: 15,
-    backgroundColor: "#ff9cbb",
-    borderRadius: 60,
+    flex: 1, padding: 12, marginTop: 12,
+    backgroundColor: "#ff9cbb", borderRadius: 60, alignItems: "center",
   },
-  summitButton: {
-    width: "40%",
-    padding: 10,
-    marginTop: 15,
-    backgroundColor: "#ff6d9b",
-    borderRadius: 60,
-    marginLeft: 20,
+  submitButton: {
+    flex: 1, padding: 12, marginTop: 12,
+    backgroundColor: "#ff6d9b", borderRadius: 60, alignItems: "center",
   },
-  cancelButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#ff3776",
-    textAlign: "center",
-  },
-  summitButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-  },
-  fakeDateInput: {
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-  },
-  fakeTimeInput: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-  },
-  fakeInputText: {
-    color: "#817b7b",
-  },
-  filledText: {
-    color: "#000000"
-  }
+  disabledButton: { backgroundColor: "#ccc" },
+  cancelButtonText: { fontSize: 16, fontWeight: "bold", color: "#ff3776" },
+  submitButtonText: { fontSize: 16, fontWeight: "bold", color: "#fff" },
 });
 
 export default AddClass;

@@ -15,7 +15,7 @@ const formReducer = (state, action) => {
         ...state,
         classes: [
           ...state.classes,
-          { id: Date.now(), ...action.payload }
+          { id: Date.now().toString(), ...action.payload }
         ]
       };
 
@@ -27,12 +27,18 @@ const formReducer = (state, action) => {
         )
       };
 
+    case "DELETE_CLASS":
+      return {
+        ...state,
+        classes: state.classes.filter(item => item.id !== action.payload)
+      };
+
     case "ADD_EXAM":
       return {
         ...state,
         exams: [
           ...state.exams,
-          { id: Date.now(), ...action.payload }
+          { id: Date.now().toString(), ...action.payload }
         ]
       };
 
@@ -42,6 +48,12 @@ const formReducer = (state, action) => {
         exams: state.exams.map(item =>
           item.id === action.payload.id ? action.payload : item
         )
+      };
+
+    case "DELETE_EXAM":
+      return {
+        ...state,
+        exams: state.exams.filter(item => item.id !== action.payload)
       };
 
     case "RESET":
