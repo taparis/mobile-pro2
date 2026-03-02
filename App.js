@@ -9,7 +9,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
 import Profile from "./src/screens/Profile";
-import Planner from "./src/screens/ActivitynPlanner";
+import Planner from "./src/screens/ActivityPlannerScreen";
+import AddPlannerScreen from "./src/screens/AddPlannerScreen";
 import TimeTable from "./src/screens/TimeTable";
 import Dashboard from "./src/screens/Dashboard";
 import EditProfile from "./src/screens/EditProfile";
@@ -24,6 +25,7 @@ import Login from "./src/screens/Login";
 
 import { ClassProvider } from "./src/context/ClassContext";
 import { UserProvider } from "./src/context/UserContext";
+import { PlannerProvider } from "./src/context/PlannerContext";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -37,10 +39,11 @@ const ProfileStackNavigator = () => (
       headerTintColor: "black",
     }}
   >
-    <Stack.Screen name="ProfileHome" component={Profile} options={{ title: "Profile" }} />
+    <Stack.Screen name="ProfileHome" component={Profile} options={{ title: "Profile", headerTitleStyle: { fontWeight: "bold", fontSize: 30 } }} />
     <Stack.Screen name="EditProfile" component={EditProfile} options={{ title: "Edit Profile" }} />
   </Stack.Navigator>
 );
+
 
 const TimeTableStackNavigator = () => (
   <TimeTableStack.Navigator
@@ -52,7 +55,9 @@ const TimeTableStackNavigator = () => (
     <TimeTableStack.Screen
       name="TimeTableHome"
       component={TimeTable}
-      options={{ title: "TimeTable" }}
+      options={{ title: "TimeTable",
+        headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
+      }}
     />
     <TimeTableStack.Screen
       name="DetailClass"
@@ -125,12 +130,51 @@ const MainTab = () => (
     <Tab.Screen
       name="TimeTable"
       component={TimeTableStackNavigator}
-      options={{ headerShown: false }}
+      options={{ headerShown: false,
+        headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
+       }}
     />
-    <Tab.Screen name="Planner" component={Planner} options={{ title: "Activity & Planner" }} />
+    <Tab.Screen name="Planner" component={PlannerStackNavigator} options={{ headerShown: false }} />
     <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ headerShown: false }} />
   </Tab.Navigator>
 );
+
+const PlannerStack = createNativeStackNavigator();
+
+const PlannerStackNavigator = () => {
+  return (
+    <PlannerProvider>
+      <PlannerStack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: "pink" },
+          headerTintColor: "black",
+        }}
+      >
+        <PlannerStack.Screen
+          name="PlannerHome"
+          component={Planner}
+          options={{ title: "Activity & Planner",
+            headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
+           }}  // ← ชื่อ header
+        />
+        <PlannerStack.Screen
+          name="AddPlanner"
+          component={AddPlannerScreen}
+          options={{ title: "Add Activity & Planner",
+            headerTitleStyle: { fontWeight: "bold", fontSize: 25 }
+          }}
+        />
+        <PlannerStack.Screen
+          name="EditPlanner"
+          component={AddPlannerScreen}
+          options={{ title: "Edit Activity & Planner",
+            headerTitleStyle: { fontWeight: "bold", fontSize: 25 }
+          }}
+        />
+      </PlannerStack.Navigator>
+    </PlannerProvider>
+  );
+};
 
 export default function App() {
   return (

@@ -7,37 +7,33 @@ const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
 const DAY_BG_COLORS = ["#FFE66D", "#FFB3D1", "#B5EAD7", "#C7CEEA", "#FFDAC1"];
 const DAY_TO_COL = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
 
-const DAY_WIDTH = 55;
-const TIME_WIDTH = 50;
+const DAY_WIDTH = 62;
+const TIME_WIDTH = 48;
 const START_HOUR = 8;
 const END_HOUR = 20;
-const HOUR_HEIGHT = 40;
+const HOUR_HEIGHT = 50;
 
 const getTopPosition = (time) => {
   const d = new Date(time);
-  return ((d.getHours() - START_HOUR) * 60 + d.getMinutes()) / 60 * HOUR_HEIGHT;
+  return ((d.getHours() - START_HOUR) + d.getMinutes() / 60) * HOUR_HEIGHT;
 };
 
 const getHeight = (start, end) => {
   const diffMin = (new Date(end) - new Date(start)) / 60000;
-  return Math.max((diffMin / 60) * HOUR_HEIGHT, 18);
+  return Math.max((diffMin / 60) * HOUR_HEIGHT, 20);
 };
 
 const TimeTable = ({ navigation }) => {
   const { classes, exams } = useContext(ClassContext);
   const [mode, setMode] = useState("class");
 
-  // Class: จาก classes[] เท่านั้น
   const classData = classes.filter((i) => i.date && i.starts && i.ends);
-
-  // Exam: จาก exams[] เท่านั้น
   const examData = exams.filter((i) => i.date && i.starts && i.ends);
-
   const displayData = mode === "exams" ? examData : classData;
 
   const renderDayHeader = () => (
     <View style={styles.dayHeaderRow}>
-      <View style={{ width: TIME_WIDTH }} />
+      <View style={{ width: TIME_WIDTH, backgroundColor: "#f8f8f8", borderRightWidth: 1, borderColor: "#ddd" }} />
       {DAYS.map((day, i) => (
         <View key={i} style={[styles.dayHeader, { backgroundColor: DAY_BG_COLORS[i] }]}>
           <Text style={styles.dayHeaderText}>{day}</Text>
@@ -46,16 +42,20 @@ const TimeTable = ({ navigation }) => {
     </View>
   );
 
-  const renderHourLines = () => {
+  const renderGrid = () => {
     const rows = [];
-    for (let h = START_HOUR; h <= END_HOUR; h++) {
-      const top = (h - START_HOUR) * HOUR_HEIGHT;
+    const totalHours = END_HOUR - START_HOUR;
+    for (let h = 0; h <= totalHours; h++) {
+      const actualHour = START_HOUR + h;
+      const top = h * HOUR_HEIGHT;
       rows.push(
-        <View key={h}>
-          <View style={[styles.hourLine, { top }]} />
-          <Text style={[styles.hourText, { top: top - 9 }]}>
-            {String(h).padStart(2, "0")}:00
-          </Text>
+        <View key={h} style={[styles.hourRow, { top }]}>
+          <View style={styles.timeLabelBox}>
+            <Text style={styles.hourText}>
+              {String(actualHour).padStart(2, "0")}:00
+            </Text>
+          </View>
+          <View style={styles.hourLine} />
         </View>
       );
     }
@@ -71,18 +71,16 @@ const TimeTable = ({ navigation }) => {
     displayData.map((item, index) => {
       const colIdx = DAY_TO_COL[new Date(item.date).getDay()];
       if (colIdx === undefined) return null;
-
       const left = TIME_WIDTH + colIdx * DAY_WIDTH;
       const top = getTopPosition(item.starts);
       const height = getHeight(item.starts, item.ends);
       const blockColor = DAY_BG_COLORS[colIdx];
-
       return (
         <View
           key={item.id || index}
           style={[
             styles.classBlock,
-            { left: left + 2, top, height, width: DAY_WIDTH - 6, backgroundColor: blockColor },
+            { left: left + 3, top, height, width: DAY_WIDTH - 7, backgroundColor: blockColor },
           ]}
         >
           <Text style={styles.classBlockText} numberOfLines={3}>
@@ -94,7 +92,6 @@ const TimeTable = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* BUTTON CARD */}
       <View style={styles.buttonCard}>
         <Text style={styles.cardTitle}>Timetable</Text>
         <View style={styles.buttonRow}>
@@ -113,28 +110,26 @@ const TimeTable = ({ navigation }) => {
         </View>
       </View>
 
-      {/* TITLE ROW */}
       <View style={styles.titleRow}>
         <Text style={styles.titleText}>
           {mode === "exams" ? "Exam Schedule" : "Class Schedule"}
         </Text>
         <TouchableOpacity
-          onPress={() =>
-            navigation.navigate(mode === "exams" ? "DetailExam" : "DetailClass")
-          }
+          onPress={() => navigation.navigate(mode === "exams" ? "DetailExam" : "DetailClass")}
         >
           <Ionicons name="create-outline" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
-      {/* TABLE — แสดงตารางเสมอ ไม่มี empty state */}
       <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
-        <View style={styles.table}>
-          {renderDayHeader()}
-          <View style={styles.gridArea}>
-            {renderHourLines()}
-            {renderDayColumns()}
-            {renderBlocks()}
+        <View style={styles.tableWrapper}>
+          <View style={styles.table}>
+            {renderDayHeader()}
+            <View style={[styles.gridArea, { height: (END_HOUR - START_HOUR) * HOUR_HEIGHT + HOUR_HEIGHT }]}>
+              {renderGrid()}
+              {renderDayColumns()}
+              {renderBlocks()}
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -166,26 +161,69 @@ const styles = StyleSheet.create({
   },
   titleText: { fontSize: 20, fontWeight: "bold" },
 
-  scrollArea: { width: "90%" },
+  scrollArea: { width: "100%" },
+
+  tableWrapper: {
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+
   table: {
     width: TIME_WIDTH + DAY_WIDTH * 5,
-    borderWidth: 1.5, borderColor: "#ccc",
-    borderRadius: 12, overflow: "hidden", marginBottom: 20,
+    borderWidth: 1.5,
+    borderColor: "#ccc",
+    borderRadius: 12,
+    overflow: "hidden",
   },
-  dayHeaderRow: { flexDirection: "row", height: 36 },
-  dayHeader: { width: DAY_WIDTH, justifyContent: "center", alignItems: "center" },
+
+  dayHeaderRow: {
+    flexDirection: "row",
+    height: 40,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  dayHeader: {
+    width: DAY_WIDTH,
+    justifyContent: "center",
+    alignItems: "center",
+    borderLeftWidth: 1,
+    borderColor: "#ddd",
+  },
   dayHeaderText: { fontWeight: "bold", fontSize: 12 },
-  gridArea: { height: (END_HOUR - START_HOUR) * HOUR_HEIGHT, position: "relative" },
-  hourLine: {
-    position: "absolute", left: TIME_WIDTH, right: 0, height: 1, backgroundColor: "#e0e0e0",
+
+  gridArea: { position: "relative" },
+
+  hourRow: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  timeLabelBox: {
+    width: TIME_WIDTH,
+    alignItems: "flex-end",
+    paddingRight: 6,
   },
   hourText: {
-    position: "absolute", left: 3, fontSize: 10, color: "#fff",
-    backgroundColor: "#f3a6c4", paddingHorizontal: 4, paddingVertical: 1, borderRadius: 6,
+    fontSize: 10,
+    color: "#888",
+    fontWeight: "600",
   },
+  hourLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e0e0e0",
+  },
+
   dayColumn: {
-    position: "absolute", top: 0, bottom: 0, width: 1, backgroundColor: "#e0e0e0",
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: "#e8e8e8",
   },
+
   classBlock: {
     position: "absolute",
     borderRadius: 6,
@@ -193,9 +231,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.7)",
+    borderColor: "rgba(255,255,255,0.8)",
+    elevation: 2,
   },
   classBlockText: {
     fontSize: 9, fontWeight: "bold", color: "#333", textAlign: "center",
   },
-});
+}); 
