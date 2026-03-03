@@ -1,81 +1,102 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useReducer, useState, useEffect } from "react";
+
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { db } from "../service/firebaseconfig";
 
 export const ClassContext = createContext();
 
-const generateId = () => `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-
-const initialState = {
-  classes: [],
-  exams: [],
-};
-
-const formReducer = (state, action) => {
-  switch (action.type) {
-
-    case "ADD_CLASS":
-      return {
-        ...state,
-        classes: [
-          ...state.classes,
-          { id: generateId(), ...action.payload } 
-        ]
-      };
-
-    case "UPDATE_CLASS":
-      return {
-        ...state,
-        classes: state.classes.map(item =>
-          item.id === action.payload.id ? action.payload : item
-        )
-      };
-
-    case "DELETE_CLASS":
-      return {
-        ...state,
-        classes: state.classes.filter(item => item.id !== action.payload)
-      };
-
-    case "ADD_EXAM":
-      return {
-        ...state,
-        exams: [
-          ...state.exams,
-          { id: Date.now().toString(), ...action.payload }
-        ]
-      };
-
-    case "UPDATE_EXAM":
-      return {
-        ...state,
-        exams: state.exams.map(item =>
-          item.id === action.payload.id ? action.payload : item
-        )
-      };
-
-    case "DELETE_EXAM":
-      return {
-        ...state,
-        exams: state.exams.filter(item => item.id !== action.payload)
-      };
-
-    case "RESET":
-      return initialState;
-
-    default:
-      return state;
-  }
-};
-
 export const ClassProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(formReducer, initialState);
+  const [classes, setClasses] = useState([])
+  const [exams, setExams] = useState([])
+
+  //เพิ่ม ลบ แก้
+  const addClass = async (payload) => {
+    try {
+      await addDoc(collection(db, "classes"), payload)
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดไม่สามารถเพิ่มวิชาได้", error)
+    }
+  }
+
+  const updateClass = async (id, payload) => {
+    try {
+      const docRef = doc(db, "classes", id)
+      const {id : _, ...dataToUpdate} = payload
+      await updateDoc(docRef, dataToUpdate)
+    }catch (error) {
+      console.error ("เกิดข้อผิดพลาดไม่สามารถ update ได้", error)
+    }
+  }
+
+  const deleteClass = async (id) => {
+    try {
+      await deleteDoc(doc(db, "classes", id))
+    }catch (error){
+      console.error ("เกิดข้อผิดพลาดไม่สามารถลบได้", error)
+    }
+  }
+
+  const addExam = async (payload) => {
+    try {
+      await addDoc(collection(db, "exams"), payload)
+    }catch (error) {
+      console.error ("เกิดข้อผิดพลาดไม่สามารถเพิ่มการสอบได้", error)
+    }
+  }
+
+  const updateExam = async (id, payload) => {
+    try {
+      const docRef = doc(db, "exams", id)
+      const {id : _, ...dataToUpdate} = payload
+      await updateDoc(docRef, dataToUpdate)
+    }catch (error) {
+      console.error ("เกิดข้อผิดพลาดไม่สามารถ update ได้", error)
+    }
+  }
+
+  const deleteExam = async (id) => {
+    try {
+      await deleteDoc(doc(db, "exams", id))
+    }catch (error){
+      console.error ("เกิดข้อผิดพลาดไม่สามารถลบได้", error)
+    }
+  }
+  //ดึงข้อมูลจาก  จาก firebase
+  useEffect(() => {
+    const qClasses = query(collection(db, "classes"))
+    const unsubClasses = onSnapshot(qClasses, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      setClasses(data)
+    })
+
+    const qExams = query(collection(db, "exam"))
+    const unsubExams = onSnapshot(qExams, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      setExams(data)
+    })
+    return () => {
+      unsubClasses()
+      unsubExams()
+    }
+  }, [])
 
   return (
     <ClassContext.Provider
       value={{
-        classes: state.classes,
-        exams: state.exams,
-        dispatch
+        classes,
+        exams,
+        addClass,
+        updateClass,
+        deleteClass,
+        addExam,
+        updateExam,
+        deleteExam
       }}
     >
       {children}
