@@ -4,7 +4,8 @@ import {
     Text,
     StyleSheet,
     ScrollView,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from "react-native";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +17,8 @@ const months = [
 
 const sortTasks = (list) => {
     return [...list].sort((a, b) => {
+        if(!a.date || !b.date || !a.start || !b.start) return 0
+
         const [da, ma, ya] = a.date.split("/").map(Number);
         const [db, mb, yb] = b.date.split("/").map(Number);
 
@@ -37,6 +40,14 @@ export default function ActivityPlannerScreen({ navigation }) {
         tasks.some(t => t.month === m)
     );
 
+    const confirmDelete = (id) => {
+        Alert.alert("ลบกิจกรรม", "คุณจะลบกิจกรรมนี้หรือไม่ ?",
+            [{text : "ยกเลิก", style : "cancel"},
+                {text : "ยืนยัน", style : "destructive", onPress : () => removeTask(id)}
+            ]
+        )
+    }
+
     return (
         <View style={styles.container}>
 
@@ -54,7 +65,7 @@ export default function ActivityPlannerScreen({ navigation }) {
 
                                     <TouchableOpacity
                                         style={styles.circle}
-                                        onPress={() => removeTask(t.id)}
+                                        onPress={() => confirmDelete(t.id)}
                                     />
 
                                     <View style={{ flex: 1 }}>
