@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-nati
 import { ClassContext } from "../context/ClassContext";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
-const DAY_BG_COLORS = ["#FFE66D", "#FFB3D1", "#B5EAD7", "#C7CEEA", "#FFDAC1"];
+const DAY_BG_COLORS = ["#FFE66D", "#FFB3D1", "#B5EAD7", "#FFDAC1", "#C7CEEA"];
 const DAY_TO_COL = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
 
 const DAY_WIDTH = 62;
