@@ -16,8 +16,8 @@ const isSameDate = (a, b) => {
   const da = new Date(a), db = new Date(b);
   return (
     da.getFullYear() === db.getFullYear() &&
-    da.getMonth()   === db.getMonth()    &&
-    da.getDate()    === db.getDate()
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
   );
 };
 
@@ -26,7 +26,7 @@ const isTimeOverlap = (sA, eA, sB, eB) => {
 };
 
 const AddExam = ({ navigation }) => {
-  const { exams, dispatch } = useContext(ClassContext);
+  const { exams, addExam } = useContext(ClassContext);
 
   const [form, setForm] = useState({
     subject: "", code: "", room: "",
@@ -54,7 +54,7 @@ const AddExam = ({ navigation }) => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.subject || !form.code) {
       Alert.alert("ข้อมูลไม่ครบ", "กรุณากรอก Subject และ Code");
       return;
@@ -75,8 +75,19 @@ const AddExam = ({ navigation }) => {
       );
       return;
     }
-    dispatch({ type: "ADD_EXAM", payload: form });
-    navigation.goBack();
+
+    try {
+      await addExam({
+        ...form,
+        date: form.date.toISOString(),
+        starts: form.starts.toISOString(),
+        ends: form.ends.toISOString(),
+      })
+      navigation.goBack();
+    }catch(error) {
+      console.error
+      Alert.alert("Error", "ไม่สามารถบันทึกการสอบได้")
+    }
   };
 
   const showDatePicker = () => {
