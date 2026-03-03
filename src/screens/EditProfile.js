@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
+import { View, ScrollView, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { UserContext } from "../context/UserContext";
 import * as ImagePicker from 'expo-image-picker'
@@ -89,7 +89,7 @@ const EditProfile = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <TouchableOpacity
                 onPress={pickImage}
                 style={styles.imageBtn}
@@ -114,7 +114,7 @@ const EditProfile = ({ navigation }) => {
                     label="Faculty"
                     value={form.faculty}
                     placeholder="Please select your faculty"
-                    onValueChange={(value) => setForm({ ...form, faculty: value })}
+                    onValueChange={(value) => setForm({ ...form, faculty: value, major: '' })}
                     options={Object.keys(FACULTIES)}
                 />
 
@@ -148,7 +148,7 @@ const EditProfile = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
