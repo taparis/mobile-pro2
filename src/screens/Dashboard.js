@@ -23,34 +23,35 @@ const formatTime = (time) => {
 
 const getNextClass = (classes) => {
   if (!classes || classes.length === 0) return null;
+
   const now = new Date();
   const todayDay = now.getDay();
   const nowMin = now.getHours() * 60 + now.getMinutes();
-  const valid = classes.filter((c) => c.date && c.starts && c.ends);
 
+  // รองรับทั้ง dayOfWeek ใหม่ และ date เก่า
+  const resolveDow = (c) =>
+    c.dayOfWeek !== undefined ? c.dayOfWeek : (c.date ? new Date(c.date).getDay() : null);
+
+  const toMin = (t) => new Date(t).getHours() * 60 + new Date(t).getMinutes();
+
+  const valid = classes.filter((c) => resolveDow(c) !== null && c.starts && c.ends);
+
+  // หาวิชาวันนี้ที่ยังไม่ถึงเวลา
   const todayUpcoming = valid
-    .filter((c) => {
-      const d = new Date(c.date).getDay();
-      const startMin = new Date(c.starts).getHours() * 60 + new Date(c.starts).getMinutes();
-      return d === todayDay && startMin > nowMin;
-    })
-    .sort((a, b) =>
-      new Date(a.starts).getHours() * 60 + new Date(a.starts).getMinutes() -
-      (new Date(b.starts).getHours() * 60 + new Date(b.starts).getMinutes())
-    );
+    .filter((c) => resolveDow(c) === todayDay && toMin(c.starts) > nowMin)
+    .sort((a, b) => toMin(a.starts) - toMin(b.starts));
 
   if (todayUpcoming.length > 0) return { item: todayUpcoming[0], daysUntil: 0 };
 
+  // หาวิชาวันถัดไปใน 6 วันข้างหน้า
   for (let i = 1; i <= 6; i++) {
     const targetDay = (todayDay + i) % 7;
     const found = valid
-      .filter((c) => new Date(c.date).getDay() === targetDay)
-      .sort((a, b) =>
-        new Date(a.starts).getHours() * 60 + new Date(a.starts).getMinutes() -
-        (new Date(b.starts).getHours() * 60 + new Date(b.starts).getMinutes())
-      );
+      .filter((c) => resolveDow(c) === targetDay)
+      .sort((a, b) => toMin(a.starts) - toMin(b.starts));
     if (found.length > 0) return { item: found[0], daysUntil: i };
   }
+
   return null;
 };
 
@@ -197,8 +198,6 @@ const Dashboard = () => {
             tasks.map((task) => (
               <View key={task.id} style={styles.taskbox}>
                 <Text style={styles.taskBoxlabel}>{task.desc}</Text>
-                <Text style={styles.taskBoxlabel}>{task.Date}</Text>
-                <Text style={styles.taskBoxlabel}>{task.Time}</Text>
               </View>
             ))
           )}
