@@ -18,7 +18,7 @@ const getDayName = (date) => {
 
 const getDayColor = (date) => {
   if (!date) return "#eee";
-  const colors = ["#FFD6D6","#FFE66D","#FFB3D1","#B5EAD7","#C7CEEA","#FFDAC1","#E2F0CB"];
+  const colors = ["#FFD6D6","#FFE66D","#FFB3D1","#B5EAD7","#FFDAC1","#C7CEEA","#E2F0CB"];
   return colors[new Date(date).getDay()];
 };
 
