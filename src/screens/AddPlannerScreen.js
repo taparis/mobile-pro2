@@ -79,7 +79,7 @@ export default function AddPlannerScreen({ navigation, route }) {
         });
     };
 
-    const submit = () => {
+    const submit = async () => {
 
         if (!desc || !date || !start || !end) {
             Alert.alert("Error", "สร้างไร เอาให้ครบก่อน !");
@@ -114,22 +114,26 @@ export default function AddPlannerScreen({ navigation, route }) {
             "July", "August", "September", "October", "November", "December"
         ];
 
-        const newTask = {
-            id: editingTask?.id || Date.now().toString(),
+        const taskData = {
+            id: editingTask?.id || null,
             desc,
-            date: formatDate(date),
+            date: dateStr,
             start: formatTime(start),
             end: formatEnd(end),
-            month: months[date.getMonth()]
+            month: months[date.getMonth()],
+            timestamp: startDate.toISOString()
         };
 
-        if (isEdit) {
-            updateTask(newTask);
-        } else {
-            addTask(newTask);
+        try{
+            if(isEdit){
+                await updateTask(taskData)
+            }else {
+                await addTask(taskData)
+            }
+            navigation.goBack()
+        }catch(error){
+            Alert.alert("Error", "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง")
         }
-
-        navigation.goBack();
     };
 
     const deleteTask = () => {

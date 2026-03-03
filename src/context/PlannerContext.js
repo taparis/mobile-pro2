@@ -43,7 +43,7 @@ export const PlannerProvider = ({ children }) => {
         }
     }
 
-    const deleteTask = async (id) => {
+    const removeTask = async (id) => {
         try {
             await deleteDoc(doc(db, "planner_tasks", id))
         } catch (error) {
@@ -57,7 +57,7 @@ export const PlannerProvider = ({ children }) => {
             value={{
                 tasks,
                 addTask,
-                deleteTask,
+                removeTask,
                 updateTask,
             }}
         >
