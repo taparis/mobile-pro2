@@ -2,6 +2,14 @@ import React, { createContext, useReducer } from "react";
 
 export const UserContext = createContext()
 
+const initialState = {
+    name: "",
+    faculty: "",
+    major: "",
+    year: "",
+    image: null
+};
+
 const userReducer = (state, action) => {
     switch (action.type) {
         case 'ADD_USER':
@@ -14,7 +22,8 @@ const userReducer = (state, action) => {
 }
 
 export const UserProvider = ({ children }) => {
-    const [user, dispatch] = useReducer(userReducer, [])
+
+    const [user, dispatch] = useReducer(userReducer, initialState)
 
     return (
         <UserContext.Provider value={{ user, dispatch }}>

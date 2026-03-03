@@ -1,17 +1,33 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 import { UserContext } from "../context/UserContext";
+import { ClassContext } from "../context/ClassContext";
+import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
 
 const Profile = ({ navigation }) => {
 
-    const { user } = useContext(UserContext);
+    const { user, dispatch } = useContext(UserContext);
+    const { dispatch: classDispatch } = useContext(ClassContext);
+    const { resetTasks } = useContext(PlannerContext);
 
     const handleDeleteData = () => {
-        Alert.alert("Delete All Data", "Do you want to delete all the data?",
-            [{ text: "Cancel" }, { text: "Confirm" }],
+        Alert.alert(
+            "Delete All Data",
+            "Do you want to delete all the data?",
+            [
+                { text: "Cancel" },
+                {
+                    text: "Confirm",
+                    onPress: () => {
+                        classDispatch({ type: "RESET" });
+                        resetTasks();
+                    }
+                }
+            ],
             { cancelable: true }
         );
+
     };
 
     return (

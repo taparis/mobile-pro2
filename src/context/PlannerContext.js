@@ -18,9 +18,11 @@ export const PlannerProvider = ({ children }) => {
             prev.filter(t => t.id !== id)
         );
 
+    const resetTasks = () => setTasks([]);
+
     return (
         <PlannerContext.Provider
-            value={{ tasks, addTask, removeTask, updateTask }}
+            value={{ tasks, addTask, removeTask, updateTask, resetTasks }}
         >
             {children}
         </PlannerContext.Provider>
