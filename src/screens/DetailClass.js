@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   dayBox: {
-    width: 80,
+    width: 80 ,
     minHeight: 85,
     borderRadius: 16,
     padding: 10,
