@@ -2,6 +2,9 @@ import React, { createContext, useReducer } from "react";
 
 export const ClassContext = createContext();
 
+const generateId = () => `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+
 const initialState = {
   classes: [],
   exams: [],
@@ -15,7 +18,7 @@ const formReducer = (state, action) => {
         ...state,
         classes: [
           ...state.classes,
-          { id: Date.now().toString(), ...action.payload }
+          { id: generateId(), ...action.payload } 
         ]
       };
 
