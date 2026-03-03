@@ -1,36 +1,31 @@
 import React, { useState, useContext, useLayoutEffect } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Modal,
+  View, Text, StyleSheet, TouchableOpacity, FlatList, Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
 
-// แสดงชื่อวันในสัปดาห์ เช่น Mon, Tue
-const getDayName = (date) => {
-  if (!date) return "";
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  return days[new Date(date).getDay()];
+// รับ dayOfWeek (0-6) โดยตรง
+const getDayName = (dayOfWeek) => {
+  if (dayOfWeek === undefined || dayOfWeek === null) return "";
+  return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][dayOfWeek];
 };
 
-const getDayColor = (date) => {
-  if (!date) return "#eee";
-  const day = new Date(date).getDay();
-  const colors = ["#FFD6D6","#FFE66D","#FFB3D1","#B5EAD7","#C7CEEA","#FFDAC1","#E2F0CB"];
-  return colors[day];
+const getDayColor = (dayOfWeek) => {
+  if (dayOfWeek === undefined || dayOfWeek === null) return "#eee";
+  return ["#FFD6D6","#FFE66D","#FFB3D1","#B5EAD7","#FFDAC1","#C7CEEA","#E2F0CB"][dayOfWeek];
 };
 
-// แสดงเวลา HH:MM
 const formatTime = (time) => {
   if (!time) return "--:--";
-  return new Date(time).toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+};
+
+// resolve dayOfWeek รองรับทั้ง data เก่า (date) และใหม่ (dayOfWeek)
+const resolveDayOfWeek = (item) => {
+  if (item.dayOfWeek !== undefined) return item.dayOfWeek;
+  if (item.date) return new Date(item.date).getDay();
+  return null;
 };
 
 const DetailClass = ({ navigation }) => {
@@ -56,13 +51,13 @@ const DetailClass = ({ navigation }) => {
     });
   }, [navigation]);
 
-  // เรียงตามวันในสัปดาห์ (จันทร์→อาทิตย์) แล้วตามเวลาเริ่ม
-  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon...Sat,Sun
+  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
   const sortedClasses = [...classes]
     .filter((i) => i.type !== "exams")
     .sort((a, b) => {
-      const dayA = DAY_ORDER.indexOf(new Date(a.date).getDay());
-      const dayB = DAY_ORDER.indexOf(new Date(b.date).getDay());
+      const dayA = DAY_ORDER.indexOf(resolveDayOfWeek(a));
+      const dayB = DAY_ORDER.indexOf(resolveDayOfWeek(b));
       if (dayA !== dayB) return dayA - dayB;
       return new Date(a.starts) - new Date(b.starts);
     });
@@ -85,39 +80,33 @@ const DetailClass = ({ navigation }) => {
             <Text style={styles.emptySubText}>กด + เพื่อเพิ่มรายวิชา</Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={styles.frame}>
-            {/* กล่องซ้าย: วันในสัปดาห์ + เวลา */}
-            <View style={[styles.dayBox, { backgroundColor: getDayColor(item.date) }]}>
-              <Text style={styles.dayText}>{getDayName(item.date)}</Text>
-              <Text style={styles.timeText}>
-                {formatTime(item.starts)}
-              </Text>
-              <Text style={styles.timeText}>
-                {formatTime(item.ends)}
-              </Text>
+        renderItem={({ item }) => {
+          const dow = resolveDayOfWeek(item);
+          return (
+            <View style={styles.frame}>
+              <View style={[styles.dayBox, { backgroundColor: getDayColor(dow) }]}>
+                <Text style={styles.dayText}>{getDayName(dow)}</Text>
+                <Text style={styles.timeText}>{formatTime(item.starts)}</Text>
+                <Text style={styles.timeText}>{formatTime(item.ends)}</Text>
+              </View>
+              <View style={styles.infoBox}>
+                <Text style={styles.codeText}>{item.code}</Text>
+                <Text style={styles.subjectText}>{item.subject}</Text>
+                <Text style={styles.roomText}>
+                  <Ionicons name="location-outline" size={13} color="#888" /> {item.room}
+                </Text>
+              </View>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity onPress={() => navigation.navigate("EditClass", { item })}>
+                  <Ionicons name="create-outline" size={24} color="#555" />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ marginTop: 10 }} onPress={() => setDeleteTarget(item)}>
+                  <Ionicons name="trash-outline" size={24} color="#ff3776" />
+                </TouchableOpacity>
+              </View>
             </View>
-
-            {/* ข้อมูลวิชา */}
-            <View style={styles.infoBox}>
-              <Text style={styles.codeText}>{item.code}</Text>
-              <Text style={styles.subjectText}>{item.subject}</Text>
-              <Text style={styles.roomText}>
-                <Ionicons name="location-outline" size={13} color="#888" /> {item.room}
-              </Text>
-            </View>
-
-            {/* ปุ่ม edit / delete */}
-            <View style={styles.actionButtons}>
-              <TouchableOpacity onPress={() => navigation.navigate("EditClass", { item })}>
-                <Ionicons name="create-outline" size={24} color="#555" />
-              </TouchableOpacity>
-              <TouchableOpacity style={{ marginTop: 10 }} onPress={() => setDeleteTarget(item)}>
-                <Ionicons name="trash-outline" size={24} color="#ff3776" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+          );
+        }}
       />
 
       <Modal transparent visible={!!deleteTarget} animationType="fade">
@@ -147,21 +136,13 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 18, fontWeight: "bold", color: "#aaa", marginTop: 12 },
   emptySubText: { fontSize: 14, color: "#ccc", marginTop: 4 },
   frame: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EBD1D8",
-    marginHorizontal: 15,
-    marginTop: 15,
-    padding: 15,
-    borderRadius: 20,
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: "#EBD1D8", marginHorizontal: 15,
+    marginTop: 15, padding: 15, borderRadius: 20,
   },
   dayBox: {
-    width: 80,
-    minHeight: 85,
-    borderRadius: 16,
-    padding: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 80, minHeight: 85, borderRadius: 16,
+    padding: 10, justifyContent: "center", alignItems: "center",
   },
   dayText: { fontWeight: "bold", fontSize: 20, color: "#333" },
   timeText: { fontSize: 12, color: "#444", fontWeight: "500", marginTop: 2 },

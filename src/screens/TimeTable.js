@@ -29,7 +29,7 @@ const TimeTable = ({ navigation }) => {
   const isFocused = useIsFocused();
   const [mode, setMode] = useState("class");
 
-  const classData = classes.filter((i) => i.date && i.starts && i.ends);
+  const classData = classes.filter((i) => i.dayOfWeek !== undefined && i.starts && i.ends);
   const examData = exams.filter((i) => i.date && i.starts && i.ends);
   const displayData = mode === "exams" ? examData : classData;
 
@@ -73,28 +73,37 @@ const TimeTable = ({ navigation }) => {
       <View key={i} style={[styles.dayColumn, { left: TIME_WIDTH + i * DAY_WIDTH }]} />
     ));
 
-  const renderBlocks = () =>
-    displayData.map((item, index) => {
-      const colIdx = DAY_TO_COL[new Date(item.date).getDay()];
-      if (colIdx === undefined) return null;
-      const left = TIME_WIDTH + colIdx * DAY_WIDTH;
-      const top = getTopPosition(item.starts);
-      const height = getHeight(item.starts, item.ends);
-      const blockColor = DAY_BG_COLORS[colIdx];
-      return (
-        <View
-          key={item.id || index}
-          style={[
-            styles.classBlock,
-            { left: left + 3, top, height, width: DAY_WIDTH - 7, backgroundColor: blockColor },
-          ]}
-        >
-          <Text style={styles.classBlockText} numberOfLines={3}>
-            {item.code || item.subject}
-          </Text>
-        </View>
-      );
-    });
+const renderBlocks = () =>
+  displayData.map((item, index) => {
+    // รองรับทั้ง dayOfWeek ใหม่ และ date เก่า
+    const dow = item.dayOfWeek !== undefined
+      ? item.dayOfWeek
+      : (item.date ? new Date(item.date).getDay() : null);
+
+    const colIdx = DAY_TO_COL[dow];
+    if (colIdx === undefined || colIdx === null) return null;
+
+    const left = TIME_WIDTH + colIdx * DAY_WIDTH;
+    const top = getTopPosition(item.starts);
+    const height = getHeight(item.starts, item.ends);
+    const blockColor = DAY_BG_COLORS[colIdx];
+
+    return (
+      <View
+        key={item.id || index}
+        style={[
+          styles.classBlock,
+          { left: left + 3, top, height, width: DAY_WIDTH - 7, backgroundColor: blockColor },
+        ]}
+      >
+        <Text style={styles.classBlockCode} numberOfLines={1}>{item.code}</Text>
+        <Text style={styles.classBlockText} numberOfLines={2}>{item.subject}</Text>
+        {item.room ? (
+          <Text style={styles.classBlockRoom} numberOfLines={1}>{item.room}</Text>
+        ) : null}
+      </View>
+    );
+  });
 
   return (
     <View style={styles.container}>
@@ -240,7 +249,22 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.8)",
     elevation: 2,
   },
-  classBlockText: {
-    fontSize: 9, fontWeight: "bold", color: "#333", textAlign: "center",
-  },
+  classBlockCode: {
+  fontSize: 8,
+  fontWeight: "bold",
+  color: "#555",
+  textAlign: "center",
+},
+classBlockText: {
+  fontSize: 9,
+  fontWeight: "bold",
+  color: "#333",
+  textAlign: "center",
+},
+classBlockRoom: {
+  fontSize: 7,
+  color: "#555",
+  textAlign: "center",
+  marginTop: 1,
+},
 }); 
