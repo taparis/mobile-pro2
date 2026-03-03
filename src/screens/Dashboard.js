@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
+import { PlannerContext } from "../context/PlannerContext";
 
 const formatTime = (time) => {
   if (!time) return "--:--";
@@ -85,9 +86,11 @@ const Dashboard = () => {
   const nextExam = getNextExam(exams);
 
   // Task state (local)
-  const [tasks, setTasks] = useState([]);
+  // const [tasks, setTasks] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newTask, setNewTask] = useState("");
+
+  const { tasks } = useContext(PlannerContext);
 
   const handleAddTask = () => {
     const trimmed = newTask.trim();
@@ -170,7 +173,7 @@ const Dashboard = () => {
       <View style={styles.cardContainer}>
         <Text style={styles.headlabel}>Your Task</Text>
         <View style={styles.card}>
-          {tasks.length === 0 ? (
+          {/* {tasks.length === 0 ? (
             <View style={styles.emptyRow}>
               <Ionicons name="clipboard-outline" size={20} color="#ffb6c1" />
               <Text style={styles.emptyText}>ยังไม่มี Task</Text>
@@ -182,6 +185,20 @@ const Dashboard = () => {
                 <TouchableOpacity onPress={() => handleDeleteTask(task.id)}>
                   <Ionicons name="close-circle-outline" size={20} color="#ff3776" />
                 </TouchableOpacity>
+              </View>
+            ))
+          )} */}
+          {tasks.length === 0 ? (
+            <View style={styles.emptyRow}>
+              <Ionicons name="clipboard-outline" size={20} color="#ffb6c1" />
+              <Text style={styles.emptyText}>ยังไม่มี Task</Text>
+            </View>
+          ) : (
+            tasks.map((task) => (
+              <View key={task.id} style={styles.taskbox}>
+                <Text style={styles.taskBoxlabel}>{task.desc}</Text>
+                <Text style={styles.taskBoxlabel}>{task.Date}</Text>
+                <Text style={styles.taskBoxlabel}>{task.Time}</Text>
               </View>
             ))
           )}
