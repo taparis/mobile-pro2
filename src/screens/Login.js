@@ -1,7 +1,10 @@
 import React, { useState, useContext } from "react";
-import {View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { UserContext } from "../context/UserContext";
 import TextFormInput from "../components/TextFormInput";
+
+import { auth } from "../service/firebaseconfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = ({ navigation }) => {
   const { state } = useContext(UserContext);
@@ -9,9 +12,22 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       return Alert.alert("Error", "Please fill in all fields.");
+    }
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
+
+      Alert.alert("Success", "Login Successful"), [
+        { text: "OK", onPress: () => navigation.replace('MainTab') }
+      ]
+    } catch (error) {
+      let errorMessage = "Invalid input"
+      if (error.code === 'auth/user-not-fount') errorMessage = " No user found"
+
+      Alert.alert("Login Failed", errorMessage)
     }
 
     const foundUser = state.users?.find(

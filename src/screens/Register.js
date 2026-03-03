@@ -7,6 +7,10 @@ import { UserContext } from '../context/UserContext';
 import TextFormInput from "../components/TextFormInput";
 import SelectFormInput from "../components/SelectFormInput";
 
+import { auth, db } from "../service/firebaseconfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+
 const Register = ({ navigation }) => {
     const { dispatch } = useContext(UserContext)
     const [form, setForm] = useState({
@@ -72,7 +76,7 @@ const Register = ({ navigation }) => {
         if (!result.canceled) setForm({ ...form, image: result.assets[0].uri })
     }
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (!form.name || !form.email || !form.faculty || !form.major || !form.year || !form.password) {
             return Alert.alert('Error', 'Fill in all the required information')
         }
@@ -83,11 +87,24 @@ const Register = ({ navigation }) => {
             return Alert.alert('Error', 'Passwords do not match')
         }
 
-        dispatch({ type: 'ADD_USER', payload: form })
-        Alert.alert('Success', 'Registration completed', [{
-            text: 'OK',
-            onPress: () => navigation.replace("MainTab")
-        }])
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password)
+            const user = userCredential.user
+
+            const {password, confirmPassword, ...userData} = form
+            
+            await setDoc(doc(db, "user", user.uid),{
+                ...userData,
+                uid : user.uid,
+                createAt : new Date().toISOString()
+            })
+
+            Alert.alert ("Success", "Register Completed", [
+                {text : 'OK', onPress : () => navigation.replace("MainTab")}
+            ])
+        }catch (error) {
+            Alert.alert ("Register Error", error.message)
+        }
     }
 
     return (
