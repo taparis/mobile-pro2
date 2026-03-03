@@ -1,6 +1,7 @@
 import React, { useState, useContext, useLayoutEffect } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList, Modal,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
@@ -62,9 +63,13 @@ const DetailClass = ({ navigation }) => {
       return new Date(a.starts) - new Date(b.starts);
     });
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    try{
     dispatch({ type: "DELETE_CLASS", payload: deleteTarget.id });
     setDeleteTarget(null);
+    }catch(error){
+      Alert.alert("Error", "ไม่สามารถลบข้อมูลได้")
+    }
   };
 
   return (
