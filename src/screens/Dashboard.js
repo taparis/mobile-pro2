@@ -108,7 +108,7 @@ const getNextTask = (tasks) => {
   return upcoming[0] || null;
 };
 
-const Dashboard = ({navigation}) => {
+const Dashboard = ({ navigation }) => {
   const context = useContext(ClassContext);
   const classes = context?.classes || [];
   const exams = context?.exams || [];
@@ -118,7 +118,7 @@ const Dashboard = ({navigation}) => {
   const nextDaysUntil = nextClassResult?.daysUntil ?? null;
   const nextExam = getNextExam(exams);
 
-  const { tasks = []} = useContext(PlannerContext);
+  const { tasks = [] } = useContext(PlannerContext);
   const nextTask = getNextTask(tasks);
 
   return (
@@ -243,7 +243,11 @@ const Dashboard = ({navigation}) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Planner")}
+          onPress={() =>
+            navigation.navigate("Planner", {
+              screen: "AddPlanner",
+            })
+          }
         >
           <Text style={styles.buttonText}>Add Task</Text>
         </TouchableOpacity>
