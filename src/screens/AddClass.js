@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 const DAY_OPTIONS = [
   { label: "จันทร์ (Mon)", value: 1 },
   { label: "อังคาร (Tue)", value: 2 },
-  { label: "พุธ (Wed)",    value: 3 },
+  { label: "พุธ (Wed)", value: 3 },
   { label: "พฤหัส (Thu)", value: 4 },
   { label: "ศุกร์ (Fri)", value: 5 },
 ];
@@ -35,11 +35,11 @@ const formatTime = (time) => {
 };
 
 const AddClass = ({ navigation }) => {
-  const { classes, dispatch } = useContext(ClassContext);
+  const { classes, addClass } = useContext(ClassContext);
 
   const [subject, setSubject] = useState("");
-  const [code, setCode]       = useState("");
-  const [room, setRoom]       = useState("");
+  const [code, setCode] = useState("");
+  const [room, setRoom] = useState("");
 
   // แต่ละ row = { dayOfWeek, starts, ends }
   const [schedules, setSchedules] = useState([
@@ -95,7 +95,7 @@ const AddClass = ({ navigation }) => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!subject || !code) {
       Alert.alert("ข้อมูลไม่ครบ", "กรุณากรอก Subject และ Code");
       return;
@@ -127,22 +127,26 @@ const AddClass = ({ navigation }) => {
       }
     }
 
-    // สร้างหลาย entry อัตโนมัติ
-    schedules.forEach((row) => {
-      dispatch({
-        type: "ADD_CLASS",
-        payload: {
-          subject, code, room,
+    try {
+      const promises = schedules.map((row) => {
+        return addClass({
+          subject,
+          code,
+          room,
           dayOfWeek: row.dayOfWeek,
-          starts: row.starts,
-          ends: row.ends,
-          type: "class",
-        },
-      });
-    });
+          starts: row.starts.toISOString(),
+          ends: row.ends.toISOString(),
+          type: 'class'
+        })
+      })
+      await Promise.all(promises)
+      navigation.goBack()
+    } catch (error) {
+      Alert.alert("Error", "ไม่สามารถบันทึกช้อมูลได้")
+    }
+  }
 
-    navigation.goBack();
-  };
+
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
