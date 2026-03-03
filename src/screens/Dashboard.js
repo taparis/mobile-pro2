@@ -197,8 +197,6 @@ const Dashboard = () => {
             tasks.map((task) => (
               <View key={task.id} style={styles.taskbox}>
                 <Text style={styles.taskBoxlabel}>{task.desc}</Text>
-                <Text style={styles.taskBoxlabel}>{task.Date}</Text>
-                <Text style={styles.taskBoxlabel}>{task.Time}</Text>
               </View>
             ))
           )}
