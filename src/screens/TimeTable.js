@@ -34,7 +34,7 @@ const TimeTable = ({ navigation }) => {
   const displayData = mode === "exams" ? examData : classData;
 
   useEffect(() => {
-    console.log("TimeTable Focused");
+    
   }, [isFocused]);
 
   const renderDayHeader = () => (
