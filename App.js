@@ -55,7 +55,8 @@ const TimeTableStackNavigator = () => (
     <TimeTableStack.Screen
       name="TimeTableHome"
       component={TimeTable}
-      options={{ title: "TimeTable",
+      options={{
+        title: "TimeTable",
         headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
       }}
     />
@@ -130,9 +131,10 @@ const MainTab = () => (
     <Tab.Screen
       name="TimeTable"
       component={TimeTableStackNavigator}
-      options={{ headerShown: false,
+      options={{
+        headerShown: false,
         headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
-       }}
+      }}
     />
     <Tab.Screen name="Planner" component={PlannerStackNavigator} options={{ headerShown: false }} />
     <Tab.Screen name="Profile" component={ProfileStackNavigator} options={{ headerShown: false }} />
@@ -143,36 +145,37 @@ const PlannerStack = createNativeStackNavigator();
 
 const PlannerStackNavigator = () => {
   return (
-    <PlannerProvider>
-      <PlannerStack.Navigator
-        screenOptions={{
-          headerStyle: { backgroundColor: "pink" },
-          headerTintColor: "black",
+    <PlannerStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "pink" },
+        headerTintColor: "black",
+      }}
+    >
+      <PlannerStack.Screen
+        name="PlannerHome"
+        component={Planner}
+        options={{
+          title: "Activity & Planner",
+          headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
+        }}  // ← ชื่อ header
+      />
+      <PlannerStack.Screen
+        name="AddPlanner"
+        component={AddPlannerScreen}
+        options={{
+          title: "Add Activity & Planner",
+          headerTitleStyle: { fontWeight: "bold", fontSize: 25 }
         }}
-      >
-        <PlannerStack.Screen
-          name="PlannerHome"
-          component={Planner}
-          options={{ title: "Activity & Planner",
-            headerTitleStyle: { fontWeight: "bold", fontSize: 30 }
-           }}  // ← ชื่อ header
-        />
-        <PlannerStack.Screen
-          name="AddPlanner"
-          component={AddPlannerScreen}
-          options={{ title: "Add Activity & Planner",
-            headerTitleStyle: { fontWeight: "bold", fontSize: 25 }
-          }}
-        />
-        <PlannerStack.Screen
-          name="EditPlanner"
-          component={AddPlannerScreen}
-          options={{ title: "Edit Activity & Planner",
-            headerTitleStyle: { fontWeight: "bold", fontSize: 25 }
-          }}
-        />
-      </PlannerStack.Navigator>
-    </PlannerProvider>
+      />
+      <PlannerStack.Screen
+        name="EditPlanner"
+        component={AddPlannerScreen}
+        options={{
+          title: "Edit Activity & Planner",
+          headerTitleStyle: { fontWeight: "bold", fontSize: 25 }
+        }}
+      />
+    </PlannerStack.Navigator>
   );
 };
 
@@ -180,22 +183,24 @@ export default function App() {
   return (
     <UserProvider>
       <ClassProvider>
-        <NavigationContainer>
-          <MainTabStack.Navigator
-            screenOptions={{
-              headerStyle: { backgroundColor: "pink" },
-              headerTintColor: "black",
-            }}
-          >
-            {/* <MainTabStack.Screen name="Register" component={Register} options={{ title: "Register" }} /> */}
-            {/* <MainTabStack.Screen name="Login" component={Login} options={{ title: "Login" }} /> */}
-            <MainTabStack.Screen
-              name="MainTab"
-              component={MainTab}
-              options={{ headerShown: false }}
-            />
-          </MainTabStack.Navigator>
-        </NavigationContainer>
+        <PlannerProvider>
+          <NavigationContainer>
+            <MainTabStack.Navigator
+              screenOptions={{
+                headerStyle: { backgroundColor: "pink" },
+                headerTintColor: "black",
+              }}
+            >
+              {/* <MainTabStack.Screen name="Register" component={Register} options={{ title: "Register" }} /> */}
+              {/* <MainTabStack.Screen name="Login" component={Login} options={{ title: "Login" }} /> */}
+              <MainTabStack.Screen
+                name="MainTab"
+                component={MainTab}
+                options={{ headerShown: false }}
+              />
+            </MainTabStack.Navigator>
+          </NavigationContainer>
+        </PlannerProvider>
       </ClassProvider>
     </UserProvider>
   );

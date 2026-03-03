@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { ClassContext } from "../context/ClassContext";
+import { useIsFocused } from "@react-navigation/native";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
 const DAY_BG_COLORS = ["#FFE66D", "#FFB3D1", "#B5EAD7", "#FFDAC1", "#C7CEEA"];
@@ -25,11 +26,16 @@ const getHeight = (start, end) => {
 
 const TimeTable = ({ navigation }) => {
   const { classes, exams } = useContext(ClassContext);
+  const isFocused = useIsFocused();
   const [mode, setMode] = useState("class");
 
   const classData = classes.filter((i) => i.date && i.starts && i.ends);
   const examData = exams.filter((i) => i.date && i.starts && i.ends);
   const displayData = mode === "exams" ? examData : classData;
+
+  useEffect(() => {
+    console.log("TimeTable Focused");
+  }, [isFocused]);
 
   const renderDayHeader = () => (
     <View style={styles.dayHeaderRow}>
