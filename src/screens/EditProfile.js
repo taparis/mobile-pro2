@@ -8,7 +8,7 @@ import SelectFormInput from "../components/SelectFormInput";
 
 const EditProfile = ({ navigation }) => {
 
-    const { user, dispatch } = useContext(UserContext);
+    const { user, saveUserProfile } = useContext(UserContext);
 
     const [form, setForm] = useState({
         name: '',
@@ -69,13 +69,16 @@ const EditProfile = ({ navigation }) => {
         });
     }, [user]);
 
-    const handleRegister = () => {
-        dispatch({
-            type: "UPDATE_USER",
-            payload: form,
-        });
-        navigation.goBack();
-    };
+    const handleRegister = async () => {
+        const success = await saveUserProfile(form, form.image !== user.image? form.image : null)
+
+        if(success) {
+            Alert.alert("Success", "Your Profile Update Already")
+            navigation.goBack()
+        }else {
+            Alert.alert("Error", "Cloud not update profile")
+        }
+    }; 
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({

@@ -5,6 +5,9 @@ import { ClassContext } from "../context/ClassContext";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
 
+import { auth } from "../service/firebaseconfig";
+import { signOut } from "firebase/auth";
+
 const Profile = ({ navigation }) => {
 
     const { user, dispatch } = useContext(UserContext);
@@ -19,9 +22,11 @@ const Profile = ({ navigation }) => {
                 { text: "Cancel" },
                 {
                     text: "Confirm",
+                    style: "destructive",
                     onPress: () => {
                         classDispatch({ type: "RESET" });
                         resetTasks();
+                        Alert.alert("Deleted", "All local data hasbeen clear.")
                     }
                 }
             ],
@@ -30,6 +35,22 @@ const Profile = ({ navigation }) => {
 
     };
 
+    const handleLogout = () => {
+        Alert.alert("Logout", "Are you sure want to logout ?", [
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Logout",
+                onPress: async () => {
+                    try {
+                        await signOut(auth)
+                        navigation.replace("Login")
+                    } catch (error) {
+                        Alert.alert("Error", "Cloud not logout")
+                    }
+                }
+            }
+        ])
+    }
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'row' }}>
@@ -40,8 +61,10 @@ const Profile = ({ navigation }) => {
                     }
                 </View>
                 <View style={styles.textContainer}>
-                    <Text style={styles.nameText}>{user.name}</Text>
-                    <Text style={styles.FacultyText}>{user.faculty}</Text>
+                    <Text style={styles.nameText}>{user?.name || "Guest"}</Text>
+                    <Text style={styles.FacultyText}>{user?.faculty || "No Faculty"}</Text>
+                    <Text style={styles.majorText}>{user?.major || "No Major"}</Text>
+                    <Text style={styles.yearText}>{user?.year || "No Year"}</Text>
                     <Text>{user.major}</Text>
                     <Text>Year {user.year}</Text>
                 </View>
@@ -100,6 +123,12 @@ const styles = StyleSheet.create({
     },
     FacultyText: {
         fontSize: 16,
+    },
+    majorText: {
+        fontSize: 16,
+    },
+    yearText : {
+        fontSize : 16
     },
     button: {
         width: '90%',

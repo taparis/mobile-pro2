@@ -12,7 +12,9 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
 const Register = ({ navigation }) => {
-    const { dispatch } = useContext(UserContext)
+    const { saveUserProfile } = useContext(UserContext)
+    const [loading, setLoading] = useState(false)
+
     const [form, setForm] = useState({
         email: '',
         name: '',
@@ -77,6 +79,8 @@ const Register = ({ navigation }) => {
     }
 
     const handleRegister = async () => {
+        const { email, name, faculty, major, year, password, confirmPassword, image } = form
+
         if (!form.name || !form.email || !form.faculty || !form.major || !form.year || !form.password) {
             return Alert.alert('Error', 'Fill in all the required information')
         }
@@ -86,24 +90,36 @@ const Register = ({ navigation }) => {
         if (form.password !== form.confirmPassword) {
             return Alert.alert('Error', 'Passwords do not match')
         }
+        setLoading(true)
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password)
             const user = userCredential.user
 
-            const {password, confirmPassword, ...userData} = form
-            
-            await setDoc(doc(db, "user", user.uid),{
-                ...userData,
-                uid : user.uid,
-                createAt : new Date().toISOString()
-            })
+            const userData = {
+                name,
+                email,
+                faculty,
+                major,
+                year,
+                image: null
+            }
 
-            Alert.alert ("Success", "Register Completed", [
-                {text : 'OK', onPress : () => navigation.replace("MainTab")}
-            ])
-        }catch (error) {
-            Alert.alert ("Register Error", error.message)
+            const success = await saveUserProfile(userData, image)
+
+            if (success) {
+                console.log("Register and Profile Saved !")
+            } else {
+                Alert.alert("Error", "Save Profile Unsuccess !")
+            }
+
+        } catch (error) {
+            console.error(error)
+            let msg = "Fail to Register"
+            if(error.code === 'auth/email-already-in-use') msg = "Email is used already !"
+            Alert.alert("Register Fail !", msg)
+        }finally {
+            setLoading(false)
         }
     }
 
@@ -246,7 +262,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
-    }, 
+    },
     login: {
         marginTop: 15,
         alignItems: "center",

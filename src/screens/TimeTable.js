@@ -14,8 +14,13 @@ const START_HOUR = 8;
 const END_HOUR = 20;
 const HOUR_HEIGHT = 50;
 
+const ensureData = (val) => {
+  if (!val) return new Date();
+  return val instanceof Date ? val : new Date(val)
+}
+
 const getTopPosition = (time) => {
-  const d = new Date(time);
+  const d = ensureData(time);
   return ((d.getHours() - START_HOUR) + d.getMinutes() / 60) * HOUR_HEIGHT;
 };
 

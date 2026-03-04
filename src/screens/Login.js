@@ -7,45 +7,33 @@ import { auth } from "../service/firebaseconfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = ({ navigation }) => {
-  const { state } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
     if (!email || !password) {
       return Alert.alert("Error", "Please fill in all fields.");
     }
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      const user = userCredential.user
 
-      Alert.alert("Success", "Login Successful"), [
-        { text: "OK", onPress: () => navigation.replace('MainTab') }
-      ]
+    setLoading(true)
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      console.log("Login Successful")
     } catch (error) {
+      console.error(error)
       let errorMessage = "Invalid input"
-      if (error.code === 'auth/user-not-fount') errorMessage = " No user found"
+      if (error.code === 'auth/user-not-found') errorMessage = " No user found"
+      if (error.code === 'auth/wrong-password') errorMessage = " ่Invalid Password"
+      if (error.code === 'auth/invalid-email') errorMessage = " Invalid Email"
 
       Alert.alert("Login Failed", errorMessage)
+    } finally {
+      setLoading(false)
     }
-
-    const foundUser = state.users?.find(
-      (user) => user.email === email && user.password === password
-    );
-
-    if (!foundUser) {
-      return Alert.alert("Error", "Invalid email or password.");
-    }
-
-    Alert.alert("Success", "Login successful!", [
-      {
-        text: "OK",
-        onPress: () => navigation.replace("MainTab")
-      }
-    ]);
-  };
-
+  }
   return (
     <ScrollView
       style={styles.container}

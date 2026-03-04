@@ -1,24 +1,36 @@
 import React, { createContext, useState, useEffect } from "react";
 
-import { db } from "../service/firebaseconfig";
+import { db, auth } from "../service/firebaseconfig";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query } from "firebase/firestore";
 import { add } from "firebase/firestore/pipelines";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const PlannerContext = createContext();
 
 export const PlannerProvider = ({ children }) => {
     const [tasks, setTasks] = useState([]);
+    const [userId, setUserId] = useState(null)
+
+    useEffect(() => {
+        const unsubAuth = onAuthStateChanged(auth, (user) => {
+            setUserId(user ? user.uid : null)
+        })
+        return unsubAuth
+    }, [])
 
     //ดึงข้อมูลจาก firebase
-
     useEffect(() => {
         const q = query(collection(db, "planner_tasks"))
 
         const unsub = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data
-            }))
+            const data = snapshot.docs.map(doc => {
+                const item = doc.data()
+                return {
+                    id: doc.id,
+                    ...item,
+                    date : item.date?.toDate ? item.date.toDate() : item.date
+                }
+            })
             setTasks(data)
         })
         return () => unsub()
@@ -36,8 +48,8 @@ export const PlannerProvider = ({ children }) => {
     const updateTask = async (updated) => {
         try {
             const taskRef = doc(db, "planner_tasks", updated.id)
-            const { id, ...dateToUpdate } = updated
-            await updateDoc(taskRef, dateToUpdate)
+            const { id, ...dataToUpdate } = updated
+            await updateDoc(taskRef, dataToUpdate)
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการ update", error)
         }
