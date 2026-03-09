@@ -11,28 +11,26 @@ const UPLOAD_PRESET = 'ooktofja';
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null)
-    const [loading, setLoading] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
-            if (authUser) {
-                const userDocRef = doc(db, "users", authUser.uid);
-
-                const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        setUser({ uid: authUser.uid, ...docSnap.data() });
-                    } else {
-                        setUser({ uid: authUser.uid });
+        const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser) {
+                const userDocRef = doc(db, "users", currentUser.uid)
+                const unsubDoc = onSnapshot(userDocRef, (docSnap) => {
+                    if(docSnap.exists()){
+                        setUser({ uid : currentUser.uid, ...docSnap.data()})
+                    }else {
+                        setUser({ uid : currentUser.uid})
                     }
-                    setLoading(false);
-                });
-                return () => unsubscribeSnapshot();
+                    setLoading(false)
+                })
+                return () => unsubDoc()
             } else {
                 setUser(null);
                 setLoading(false);
             }
         });
-
         return () => unsubscribeAuth();
     }, []);
 
@@ -50,7 +48,7 @@ export const UserProvider = ({ children }) => {
                 method: 'POST',
                 body: data,
                 headers: {
-                    "Accept": "appliccation/json",
+                    "Accept": "application/json",
                     "Content-Type": "multipart/form-data"
                 }
             })
@@ -63,6 +61,7 @@ export const UserProvider = ({ children }) => {
     }
 
     const saveUserProfile = async (userData, newImageUri = null) => {
+        const currentUser = auth.currentUser
         if (!auth.currentUser) return false
 
         try {
@@ -74,7 +73,7 @@ export const UserProvider = ({ children }) => {
                 if (uploadedUrl) finalImageUrl = uploadedUrl
             }
 
-            const userDocRef = doc(db, "users", auth.currentUser.uid);
+            const userDocRef = doc(db, "users", currentUser.uid);
 
             const dataToSave = {
                 name: userData.name || "",
@@ -82,9 +81,10 @@ export const UserProvider = ({ children }) => {
                 major: userData.major || "",
                 year: userData.year || "",
                 image: finalImageUrl || null,
-                updatedAt: new Date().toDateString()
+                updatedAt: new Date().toISOString()
             }
             await setDoc(userDocRef, dataToSave, { merge: true })
+            console.log("บันทึกข้อมูลสำเร็จสำหรับ UID : ", currentUser.uid)
             return true
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการบันทึก", error)

@@ -1,6 +1,6 @@
 import React, { createContext, useReducer, useState, useEffect } from "react";
 
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from "firebase/firestore";
 import { db, auth } from "../service/firebaseconfig";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -19,6 +19,7 @@ export const ClassProvider = ({ children }) => {
   }, [])
   //เพิ่ม ลบ แก้
   const addClass = async (payload) => {
+    if(!userId) return
     try {
       await addDoc(collection(db, "classes"), { ...payload, userId })
     } catch (error) {
@@ -71,8 +72,14 @@ export const ClassProvider = ({ children }) => {
   }
   //ดึงข้อมูลจาก  จาก firebase
   useEffect(() => {
+    if(!userId){
+      setClasses([]),
+      setExams([])
+      return
+    }
+
     // 1. ดึงข้อมูล Classes
-    const qClasses = query(collection(db, "classes"));
+    const qClasses = query(collection(db, "classes"), where("userId", "==", userId));
     const unsubClasses = onSnapshot(qClasses, (snapshot) => {
       const data = snapshot.docs.map((doc) => {
         const item = doc.data();
@@ -86,7 +93,7 @@ export const ClassProvider = ({ children }) => {
       setClasses(data);
     });
 
-    const qExams = query(collection(db, "exams"));
+    const qExams = query(collection(db, "exams"), where ("userId", "==", userId));
     const unsubExams = onSnapshot(qExams, (snapshot) => {
       const data = snapshot.docs.map((doc) => {
         const item = doc.data();
@@ -104,7 +111,7 @@ export const ClassProvider = ({ children }) => {
       unsubClasses()
       unsubExams()
     }
-  }, [])
+  }, [userId])
 
   return (
     <ClassContext.Provider

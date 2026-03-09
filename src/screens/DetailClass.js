@@ -30,7 +30,7 @@ const resolveDayOfWeek = (item) => {
 };
 
 const DetailClass = ({ navigation }) => {
-  const { classes, dispatch } = useContext(ClassContext);
+  const { classes, deleteClass } = useContext(ClassContext);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   useLayoutEffect(() => {
@@ -65,8 +65,8 @@ const DetailClass = ({ navigation }) => {
 
   const handleDelete = async () => {
     try{
-    dispatch({ type: "DELETE_CLASS", payload: deleteTarget.id });
-    setDeleteTarget(null);
+    await deleteClass(deleteTarget.id)
+    setDeleteTarget(null)
     }catch(error){
       Alert.alert("Error", "ไม่สามารถลบข้อมูลได้")
     }

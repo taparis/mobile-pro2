@@ -10,8 +10,8 @@ import { signOut } from "firebase/auth";
 
 const Profile = ({ navigation }) => {
 
-    const { user, dispatch } = useContext(UserContext);
-    const { dispatch: classDispatch } = useContext(ClassContext);
+    const { user } = useContext(UserContext);
+    const { classes, exams, deleteClass, deleteExam } = useContext(ClassContext);
     const { resetTasks } = useContext(PlannerContext);
 
     const handleDeleteData = () => {
@@ -23,10 +23,18 @@ const Profile = ({ navigation }) => {
                 {
                     text: "Confirm",
                     style: "destructive",
-                    onPress: () => {
-                        classDispatch({ type: "RESET" });
-                        resetTasks();
-                        Alert.alert("Deleted", "All local data hasbeen clear.")
+                    onPress: async () => {
+                        try {
+                            const classPromises = classes.map(c => deleteClass(c.id));
+                            const examPromises = exams.map(e => deleteExam(e.id));
+
+                            await Promise.all([...classPromises, ...examPromises]);
+
+                            if (resetTasks) resetTasks(); // ถ้ามี PlannerContext
+                            Alert.alert("Deleted", "Your data has been cleared from the cloud.");
+                        } catch (error) {
+                            Alert.alert("Error", "Could not delete all data.");
+                        }
                     }
                 }
             ],
@@ -43,7 +51,6 @@ const Profile = ({ navigation }) => {
                 onPress: async () => {
                     try {
                         await signOut(auth)
-                        navigation.replace("Login")
                     } catch (error) {
                         Alert.alert("Error", "Cloud not logout")
                     }
@@ -87,6 +94,10 @@ const Profile = ({ navigation }) => {
                     Delete All Data !
                 </Text>
             </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#ff3776' }]} onPress={handleLogout}>
+                <Text style={[styles.buttonText, { color: '#fff', textAlign: 'center' }]}>Logout</Text>
+            </TouchableOpacity>
         </View>
     )
 }
@@ -127,8 +138,8 @@ const styles = StyleSheet.create({
     majorText: {
         fontSize: 16,
     },
-    yearText : {
-        fontSize : 16
+    yearText: {
+        fontSize: 16
     },
     button: {
         width: '90%',

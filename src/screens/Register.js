@@ -162,7 +162,7 @@ const Register = ({ navigation }) => {
                 label="Faculty"
                 value={form.faculty}
                 placeholder="Please select your faculty"
-                onValueChange={(value) => setForm({ ...form, faculty: value })}
+                onValueChange={(value) => setForm({ ...form, faculty: value, major : '' })}
                 options={Object.keys(FACULTIES)}
             />
 

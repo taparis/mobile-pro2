@@ -39,7 +39,7 @@ const formatDateShort = (date) => {
 };
 
 const DetailExam = ({ navigation }) => {
-  const { exams, dispatch } = useContext(ClassContext);
+  const { exams, deleteExam } = useContext(ClassContext);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   useLayoutEffect(() => {
@@ -69,10 +69,15 @@ const DetailExam = ({ navigation }) => {
     return new Date(a.date) - new Date(b.date);
   });
 
-  const handleDelete = () => {
-    dispatch({ type: "DELETE_EXAM", payload: deleteTarget.id });
+const handleDelete = async () => {
+  try {
+    await deleteExam(deleteTarget.id); 
     setDeleteTarget(null);
-  };
+  } catch (error) {
+    console.error(error);
+    Alert.alert("Error", "ไม่สามารถลบข้อมูลการสอบได้");
+  }
+};
 
   return (
     <View style={styles.container}>

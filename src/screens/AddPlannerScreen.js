@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { PlannerContext } from "../context/PlannerContext";
+import { auth } from "../service/firebaseconfig";
 
 export default function AddPlannerScreen({ navigation, route }) {
 
@@ -121,10 +122,18 @@ export default function AddPlannerScreen({ navigation, route }) {
             start: formatTime(start),
             end: formatEnd(end),
             month: months[date.getMonth()],
-            timestamp: startDate.toISOString()
+            timestamp: startDate,
+            userId : currentUserId
         };
 
         try{
+            const currentUserId = auth.currentUser?.uid
+
+            if (!currentUserId) {
+            Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่");
+            return;
+        }
+
             if(isEdit){
                 await updateTask(taskData)
             }else {

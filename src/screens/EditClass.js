@@ -33,7 +33,7 @@ const isTimeOverlap = (startsA, endsA, startsB, endsB) => {
 };
 
 const EditClass = ({ navigation, route }) => {
-  const { classes, dispatch } = useContext(ClassContext);
+  const { classes, updateClass } = useContext(ClassContext);
   const item = route?.params?.item;
 
   if (!item) {
@@ -53,8 +53,8 @@ const EditClass = ({ navigation, route }) => {
   // รองรับ data เก่า (date) และใหม่ (dayOfWeek)
   const initialDayOfWeek =
     item.dayOfWeek !== undefined ? item.dayOfWeek
-    : item.date ? new Date(item.date).getDay()
-    : null;
+      : item.date ? new Date(item.date).getDay()
+        : null;
 
   const [form, setForm] = useState({
     ...item,
@@ -79,7 +79,7 @@ const EditClass = ({ navigation, route }) => {
       );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.subject || !form.code) {
       Alert.alert("ข้อมูลไม่ครบ", "กรุณากรอก Subject และ Code");
       return;
@@ -100,8 +100,12 @@ const EditClass = ({ navigation, route }) => {
       );
       return;
     }
-    dispatch({ type: "UPDATE_CLASS", payload: form });
-    navigation.goBack();
+    try {
+      await updateClass(form.id, form);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", "ไม่สามารถอัปเดตข้อมูลได้");
+    }
   };
 
   const showTimePicker = (field) => {

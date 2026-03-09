@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { auth } from "../service/firebaseconfig";
 
 // เปรียบเทียบแค่ HH:MM
 const toMinutes = (t) => {
@@ -77,14 +78,22 @@ const AddExam = ({ navigation }) => {
     }
 
     try {
+      const currentUserId = auth.currentUser?.uid
+
+      if (!currentUserId) {
+        Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่")
+        return
+      }
+
       await addExam({
         ...form,
-        date: form.date.toISOString(),
-        starts: form.starts.toISOString(),
-        ends: form.ends.toISOString(),
+        date: form.date,
+        starts: form.starts,
+        ends: form.ends,
+        userId: currentUserId
       })
       navigation.goBack();
-    }catch(error) {
+    } catch (error) {
       console.error
       Alert.alert("Error", "ไม่สามารถบันทึกการสอบได้")
     }

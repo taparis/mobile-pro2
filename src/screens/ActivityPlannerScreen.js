@@ -48,6 +48,12 @@ export default function ActivityPlannerScreen({ navigation }) {
         )
     }
 
+    const formatData = (dateVal) => {
+        if(!dateVal) return ""
+        const d = dateVal instanceof Date ? dateVal : new Date(dateVal)
+        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
+    }
+
     return (
         <View style={styles.container}>
 
@@ -71,7 +77,7 @@ export default function ActivityPlannerScreen({ navigation }) {
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.task}>{t.desc}</Text>
                                         <Text style={styles.time}>
-                                            {t.date}  •  {t.start}-{t.end}
+                                            {formatData(t.date)}  •  {t.start}-{t.end}
                                         </Text>
                                     </View>
 

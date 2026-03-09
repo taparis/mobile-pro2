@@ -7,6 +7,8 @@ import { Picker } from "@react-native-picker/picker";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import { auth } from "../service/firebaseconfig";
+import { currentTimestamp } from "firebase/firestore/pipelines";
 
 const DAY_OPTIONS = [
   { label: "จันทร์ (Mon)", value: 1 },
@@ -128,15 +130,22 @@ const AddClass = ({ navigation }) => {
     }
 
     try {
+      const currentUserId = auth.currentUser?.uid
+
+      if (!currentUserId) {
+        Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่")
+        return
+      }
       const promises = schedules.map((row) => {
         return addClass({
           subject,
           code,
           room,
           dayOfWeek: row.dayOfWeek,
-          starts: row.starts.toISOString(),
-          ends: row.ends.toISOString(),
-          type: 'class'
+          starts: row.starts,
+          ends: row.ends,
+          type: 'class',
+          userId: currentUserId
         })
       })
       await Promise.all(promises)

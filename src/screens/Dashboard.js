@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
 import { PlannerContext } from "../context/PlannerContext";
+import { auth } from "../service/firebaseconfig";
 
 const formatTime = (time) => {
   if (!time) return "--:--";

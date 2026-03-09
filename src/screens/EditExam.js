@@ -15,8 +15,8 @@ const isSameDate = (a, b) => {
   const da = new Date(a), db = new Date(b);
   return (
     da.getFullYear() === db.getFullYear() &&
-    da.getMonth()   === db.getMonth()    &&
-    da.getDate()    === db.getDate()
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
   );
 };
 
@@ -25,7 +25,7 @@ const isTimeOverlap = (sA, eA, sB, eB) => {
 };
 
 const EditExam = ({ navigation, route }) => {
-  const { exams, dispatch } = useContext(ClassContext);
+  const { exams, updateExam } = useContext(ClassContext);
   const item = route?.params?.item;
 
   if (!item) {
@@ -70,7 +70,7 @@ const EditExam = ({ navigation, route }) => {
     return new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.subject || !form.code) {
       Alert.alert("ข้อมูลไม่ครบ", "กรุณากรอก Subject และ Code");
       return;
@@ -91,8 +91,12 @@ const EditExam = ({ navigation, route }) => {
       );
       return;
     }
-    dispatch({ type: "UPDATE_EXAM", payload: form });
-    navigation.goBack();
+    try {
+      await updateExam(form.id, form);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", "ไม่สามารถอัปเดตข้อมูลการสอบได้");
+    }
   };
 
   const showDatePicker = () => {
