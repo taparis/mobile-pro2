@@ -12,7 +12,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
 import { PlannerContext } from "../context/PlannerContext";
-import { auth } from "../service/firebaseconfig";
 
 const formatTime = (time) => {
   if (!time) return "--:--";
@@ -22,59 +21,70 @@ const formatTime = (time) => {
   });
 };
 
-const getNextClass = (classes) => {
+// time travel filter
+const getFilteredData = (data, range, type = "class") => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const endOfWeek = new Date(today);
+  endOfWeek.setDate(today.getDate() + 7);
+
+  const endOfMonth = new Date(today);
+  endOfMonth.setDate(today.getDate() + 30);
+
+  return data.filter((item) => {
+    let itemDate;
+
+    // แปลงวัน
+    if (type === "task" && item.date) {
+      const parts = item.date.split("/");
+      if (parts.length === 3) {
+        itemDate = new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+    } else if (item.date) {
+      itemDate = new Date(item.date);
+    }
+
+    if (!itemDate) return false;
+    itemDate.setHours(0, 0, 0, 0);
+
+    if (range === "today") {
+      return itemDate.getTime() === now.getTime();
+    } else if (range === "week") {
+      return itemDate >= now && itemDate <= endOfWeek;
+    } else if (range === "month") {
+      return itemDate >= now && itemDate <= endOfMonth;
+    }
+    return true;
+  });
+};
+
+const getNextClass = (classes, range) => {
   if (!classes || classes.length === 0) return null;
 
   const now = new Date();
   const todayDay = now.getDay();
   const nowMin = now.getHours() * 60 + now.getMinutes();
-
-  // รองรับทั้ง dayOfWeek ใหม่ และ date เก่า
-  const resolveDow = (c) =>
-    c.dayOfWeek !== undefined
-      ? c.dayOfWeek
-      : c.date
-        ? new Date(c.date).getDay()
-        : null;
-
   const toMin = (t) => new Date(t).getHours() * 60 + new Date(t).getMinutes();
 
-  const valid = classes.filter(
-    (c) => resolveDow(c) !== null && c.starts && c.ends,
-  );
-
-  // หาวิชาวันนี้ที่ยังไม่ถึงเวลา
-  const todayUpcoming = valid
-    .filter((c) => resolveDow(c) === todayDay && toMin(c.starts) > nowMin)
-    .sort((a, b) => toMin(a.starts) - toMin(b.starts));
-
-  if (todayUpcoming.length > 0) return { item: todayUpcoming[0], daysUntil: 0 };
-
-  // หาวิชาวันถัดไปใน 6 วันข้างหน้า
-  for (let i = 1; i <= 6; i++) {
-    const targetDay = (todayDay + i) % 7;
-    const found = valid
-      .filter((c) => resolveDow(c) === targetDay)
+  if (range === "today") {
+    const todayUpcoming = classes
+      .filter((c) => (c.dayOfWeek === todayDay) && toMin(c.ends) > nowMin)
       .sort((a, b) => toMin(a.starts) - toMin(b.starts));
-    if (found.length > 0) return { item: found[0], daysUntil: i };
+
+    return todayUpcoming.length > 0 ? { item: todayUpcoming[0], daysUntil: 0 } : null;
   }
 
-  return null;
-};
+  // นับจากวันต่อไป
+  for (let i = 1; i <= (range === "week" ? 7 : 30); i++) {
+    const targetDay = (todayDay + i) % 7;
+    const found = classes
+      .filter((c) => c.dayOfWeek === targetDay)
+      .sort((a, b) => toMin(a.starts) - toMin(b.starts));
 
-const getNextExam = (exams) => {
-  if (!exams || exams.length === 0) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const upcoming = exams
-    .filter((e) => e.date && new Date(e.date) >= today)
-    .map((e) => {
-      const d = new Date(e.date);
-      d.setHours(0, 0, 0, 0);
-      return { ...e, daysUntil: Math.round((d - today) / 86400000) };
-    })
-    .sort((a, b) => a.daysUntil - b.daysUntil);
-  return upcoming[0] || null;
+    if (found.length > 0) return { item: found[0], daysUntil: i };
+  }
+  return null;
 };
 
 const daysLabel = (d) => {
@@ -83,44 +93,36 @@ const daysLabel = (d) => {
   return `อีก ${d} วัน`;
 };
 
-//หาtaskที่ใกล้ที่สุด
-const getNextTask = (tasks) => {
-  if (!tasks || tasks.length === 0) return null;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const upcoming = tasks
-    .map((t) => {
-      if (!t.date) return null;
-
-      // แปลง dd/mm/yyyy → Date object
-      const [day, month, year] = t.date.split("/").map(Number);
-      const taskDate = new Date(year, month - 1, day);
-      taskDate.setHours(0, 0, 0, 0);
-
-      const diffDays = Math.floor((taskDate - today) / 86400000);
-
-      return { ...t, daysUntil: diffDays };
-    })
-    .filter((t) => t && t.daysUntil >= 0)
-    .sort((a, b) => a.daysUntil - b.daysUntil);
-
-  return upcoming[0] || null;
-};
-
 const Dashboard = ({ navigation }) => {
-  const context = useContext(ClassContext);
-  const classes = context?.classes || [];
-  const exams = context?.exams || [];
+  const [filterMode, setFilterMode] = useState("today"); // ใช้ชื่อให้ตรงกับ UI
 
-  const nextClassResult = getNextClass(classes);
-  const nextClass = nextClassResult?.item || null;
-  const nextDaysUntil = nextClassResult?.daysUntil ?? null;
-  const nextExam = getNextExam(exams);
-
+  const { classes = [], exams = [] } = useContext(ClassContext);
   const { tasks = [] } = useContext(PlannerContext);
-  const nextTask = getNextTask(tasks);
+
+  // กรองข้อมูลแบบ Reactive ตาม filterMode
+  const displayClasses = getNextClass(classes, filterMode);
+  const filteredExams = getFilteredData(exams, filterMode, "exam").sort((a, b) => new Date(a.date) - new Date(b.date));
+  const filteredTasks = getFilteredData(tasks, filterMode, "task");
+
+  const nextClass = displayClasses?.item || null;
+  const nextDaysUntil = displayClasses?.daysUntil ?? null;
+  const nextExam = filteredExams[0] || null;
+  const nextTask = filteredTasks[0] || null;
+
+  // คำนวณ daysUntil สำหรับ Exam และ Task แบบ Dynamic
+  const getDaysDiff = (dateStr, isTask = false) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let target;
+    if (isTask) {
+      const [d, m, y] = dateStr.split("/").map(Number);
+      target = new Date(y, m - 1, d);
+    } else {
+      target = new Date(dateStr);
+    }
+    target.setHours(0, 0, 0, 0);
+    return Math.round((target - today) / 86400000);
+  };
 
   return (
     <ScrollView
@@ -128,6 +130,21 @@ const Dashboard = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 100 }}
     >
+      {/* ── Filter Bar (Time Travel) ── */}
+      <View style={styles.filterContainer}>
+        {['today', 'week', 'month'].map((mode) => (
+          <TouchableOpacity
+            key={mode}
+            onPress={() => setFilterMode(mode)}
+            style={[styles.filterTab, filterMode === mode && styles.activeFilterTab]}
+          >
+            <Text style={[styles.filterTabText, filterMode === mode && styles.activeFilterTabText]}>
+              {mode === 'today' ? 'วันนี้' : mode === 'week' ? 'สัปดาห์นี้' : 'เดือนนี้'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {/* ── Next Class ── */}
       <View style={styles.cardContainer}>
         <Text style={styles.headlabel}>Next Class</Text>
@@ -137,27 +154,18 @@ const Dashboard = ({ navigation }) => {
               <View style={styles.timeRow}>
                 <View style={styles.timeBox}>
                   <Text style={styles.timeBoxlabel}>
-                    {formatTime(nextClass.starts)} -{" "}
-                    {formatTime(nextClass.ends)}
+                    {formatTime(nextClass.starts)} - {formatTime(nextClass.ends)}
                   </Text>
                 </View>
-                {nextDaysUntil !== null && (
-                  <Text style={styles.daysLabel}>
-                    {daysLabel(nextDaysUntil)}
-                  </Text>
-                )}
+                <Text style={styles.daysLabel}>{daysLabel(nextDaysUntil)}</Text>
               </View>
-              <Text style={styles.textlabel}>
-                ชื่อวิชา : {nextClass.subject}
-              </Text>
-              <Text style={styles.textlabel}>
-                ห้องที่เรียน : {nextClass.room || "-"}
-              </Text>
+              <Text style={styles.textlabel}>ชื่อวิชา : {nextClass.subject}</Text>
+              <Text style={styles.textlabel}>ห้องที่เรียน : {nextClass.room || "-"}</Text>
             </>
           ) : (
             <View style={styles.emptyRow}>
               <Ionicons name="calendar-outline" size={20} color="#ffb6c1" />
-              <Text style={styles.emptyText}>ไม่มีคลาสในสัปดาห์นี้</Text>
+              <Text style={styles.emptyText}>ไม่มีคลาสเรียนในช่วงนี้</Text>
             </View>
           )}
         </View>
@@ -175,27 +183,15 @@ const Dashboard = ({ navigation }) => {
                     {formatTime(nextExam.starts)} - {formatTime(nextExam.ends)}
                   </Text>
                 </View>
-                {nextExam.daysUntil !== undefined && (
-                  <Text style={styles.daysLabel}>
-                    {daysLabel(nextExam.daysUntil)}
-                  </Text>
-                )}
+                <Text style={styles.daysLabel}>{daysLabel(getDaysDiff(nextExam.date))}</Text>
               </View>
-              <Text style={styles.textlabel}>
-                ชื่อวิชา : {nextExam.subject}
-              </Text>
-              <Text style={styles.textlabel}>
-                ห้องสอบ : {nextExam.room || "-"}
-              </Text>
+              <Text style={styles.textlabel}>ชื่อวิชา : {nextExam.subject}</Text>
+              <Text style={styles.textlabel}>ห้องสอบ : {nextExam.room || "-"}</Text>
             </>
           ) : (
             <View style={styles.emptyRow}>
-              <Ionicons
-                name="document-text-outline"
-                size={20}
-                color="#ffb6c1"
-              />
-              <Text style={styles.emptyText}>ไม่มีตารางสอบที่ใกล้จะถึง</Text>
+              <Ionicons name="document-text-outline" size={20} color="#ffb6c1" />
+              <Text style={styles.emptyText}>ไม่มีตารางสอบในช่วงนี้</Text>
             </View>
           )}
         </View>
@@ -208,47 +204,31 @@ const Dashboard = ({ navigation }) => {
           {!nextTask ? (
             <View style={styles.emptyRow}>
               <Ionicons name="clipboard-outline" size={20} color="#ffb6c1" />
-              <Text style={styles.emptyText}>
-                ยังไม่มี Task ที่ใกล้จะถึง
-              </Text>
+              <Text style={styles.emptyText}>ยังไม่มี Task ในช่วงนี้</Text>
             </View>
           ) : (
             <View style={styles.taskCard}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.taskTitle}>{nextTask.desc}</Text>
-
                 <View style={styles.taskRow}>
                   <Ionicons name="calendar-outline" size={14} color="#ff6d9b" />
-                  <Text style={styles.taskSubText}>
-                    {nextTask.date}
-                  </Text>
+                  <Text style={styles.taskSubText}>{nextTask.date}</Text>
                 </View>
-
                 <View style={styles.taskRow}>
                   <Ionicons name="time-outline" size={14} color="#ff6d9b" />
-                  <Text style={styles.taskSubText}>
-                    {nextTask.start} - {nextTask.end}
-                  </Text>
+                  <Text style={styles.taskSubText}>{nextTask.start} - {nextTask.end}</Text>
                 </View>
               </View>
-
-              <Text style={styles.daysLabel}>
-                {daysLabel(nextTask.daysUntil)}
-              </Text>
+              <Text style={styles.daysLabel}>{daysLabel(getDaysDiff(nextTask.date, true))}</Text>
             </View>
           )}
         </View>
       </View>
 
-      {/* ── Add Task Button ── */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() =>
-            navigation.navigate("Planner", {
-              screen: "AddPlanner",
-            })
-          }
+          onPress={() => navigation.navigate("Planner", { screen: "AddPlanner" })}
         >
           <Text style={styles.buttonText}>Add Task</Text>
         </TouchableOpacity>
@@ -259,6 +239,31 @@ const Dashboard = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
+  filterContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 25,
+    marginTop: 20,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 15,
+    padding: 5,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  activeFilterTab: {
+    backgroundColor: '#FF4D97',
+  },
+  filterTabText: {
+    fontSize: 14,
+    color: '#888',
+    fontWeight: 'bold',
+  },
+  activeFilterTabText: {
+    color: '#fff',
+  },
   cardContainer: { paddingHorizontal: 25, paddingTop: 20 },
   headlabel: { fontSize: 28, fontWeight: "bold", color: "#646567" },
   card: {
@@ -267,7 +272,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginTop: 10,
   },
-
   timeRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -285,7 +289,6 @@ const styles = StyleSheet.create({
   timeBoxlabel: { fontWeight: "bold", fontSize: 15, color: "#fff" },
   daysLabel: { fontSize: 14, fontWeight: "bold", color: "#FF4D97" },
   textlabel: { fontWeight: "bold", fontSize: 20, marginTop: 6, color: "#333" },
-
   emptyRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -293,21 +296,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   emptyText: { fontSize: 15, color: "#bbb" },
-
-  taskbox: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "lightgrey",
-    marginTop: 8,
-    height: 36,
-    paddingHorizontal: 10,
-  },
-  taskBoxlabel: { fontSize: 16, color: "#444", flex: 1 },
-
   buttonContainer: { alignItems: "center", justifyContent: "center" },
   button: {
     paddingHorizontal: 50,
@@ -317,83 +305,29 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   buttonText: { fontWeight: "bold", color: "#fff", fontSize: 20 },
-
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBox: {
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 28,
-    width: "80%",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#333",
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: "#ffb6c1",
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
-    color: "#333",
-  },
-  modalButtons: { flexDirection: "row", gap: 12 },
-  modalCancel: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 30,
-    alignItems: "center",
-  },
-  modalCancelText: { fontWeight: "bold", color: "#555", fontSize: 15 },
-  modalConfirm: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: "#FF4D97",
-    borderRadius: 30,
-    alignItems: "center",
-  },
-  modalConfirmText: { fontWeight: "bold", color: "#fff", fontSize: 15 },
   taskCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff0f5",
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 15,
-    marginBottom: 10,
-    elevation: 2,
+    elevation: 1,
   },
-
   taskTitle: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#ff3776",
     marginBottom: 5,
   },
-
   taskRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 3,
   },
-
   taskSubText: {
     marginLeft: 6,
     fontSize: 13,
     color: "#555",
-  },
-
-  deleteBtn: {
-    paddingLeft: 10,
   },
 });
 
