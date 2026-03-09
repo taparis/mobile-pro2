@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, Alert,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { auth } from "../service/firebaseconfig";
@@ -27,13 +28,42 @@ const isTimeOverlap = (sA, eA, sB, eB) => {
 };
 
 const AddExam = ({ navigation }) => {
-  const { exams, addExam } = useContext(ClassContext);
+  const { exams, addExam, classes } = useContext(ClassContext);
+
+  // ดึงรายวิชาที่ไม่ซ้ำจาก classes (subject + code)
+  const uniqueSubjects = classes.reduce((acc, c) => {
+    const key = `${c.code}__${c.subject}`;
+    if (!acc.find((x) => x.key === key)) {
+      acc.push({ key, subject: c.subject, code: c.code });
+    }
+    return acc;
+  }, []);
 
   const [form, setForm] = useState({
-    subject: "", code: "", room: "",
-    date: null, starts: null, ends: null,
+    subject: "",
+    code: "",
+    room: "",
+    date: null,
+    starts: null,
+    ends: null,
     type: "exams",
   });
+
+  // เมื่อเลือกวิชาจาก dropdown → ใส่ subject + code อัตโนมัติ
+  const handleSubjectSelect = (key) => {
+    if (!key) {
+      setForm({ ...form, subject: "", code: "" });
+      return;
+    }
+    const found = uniqueSubjects.find((x) => x.key === key);
+    if (found) {
+      setForm({ ...form, subject: found.subject, code: found.code });
+    }
+  };
+
+  const selectedKey = uniqueSubjects.find(
+    (x) => x.subject === form.subject && x.code === form.code
+  )?.key || "";
 
   const formatDate = (date) => {
     if (!date) return "Select date";
@@ -45,7 +75,6 @@ const AddExam = ({ navigation }) => {
     return new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // ตรวจ conflict กับ exam ที่มีอยู่ (วันเดียวกัน + เวลาทับกัน)
   const checkConflict = () => {
     if (!form.date || !form.starts || !form.ends) return null;
     return exams.find((e) =>
@@ -57,7 +86,7 @@ const AddExam = ({ navigation }) => {
 
   const handleSubmit = async () => {
     if (!form.subject || !form.code) {
-      Alert.alert("ข้อมูลไม่ครบ", "กรุณากรอก Subject และ Code");
+      Alert.alert("ข้อมูลไม่ครบ", "กรุณาเลือกวิชา");
       return;
     }
     if (!form.date || !form.starts || !form.ends) {
@@ -78,11 +107,10 @@ const AddExam = ({ navigation }) => {
     }
 
     try {
-      const currentUserId = auth.currentUser?.uid
-
+      const currentUserId = auth.currentUser?.uid;
       if (!currentUserId) {
-        Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่")
-        return
+        Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่");
+        return;
       }
 
       await addExam({
@@ -90,12 +118,12 @@ const AddExam = ({ navigation }) => {
         date: form.date,
         starts: form.starts,
         ends: form.ends,
-        userId: currentUserId
-      })
+        userId: currentUserId,
+      });
       navigation.goBack();
     } catch (error) {
-      console.error
-      Alert.alert("Error", "ไม่สามารถบันทึกการสอบได้")
+      console.error(error);
+      Alert.alert("Error", "ไม่สามารถบันทึกการสอบได้");
     }
   };
 
@@ -128,24 +156,40 @@ const AddExam = ({ navigation }) => {
       <View style={styles.inputContainer}>
         <Text style={styles.title}>Add Exam</Text>
 
-        <Text style={styles.label}>Subject</Text>
-        <TextInput
-          style={styles.input} placeholder="Subject"
-          value={form.subject} onChangeText={(t) => setForm({ ...form, subject: t })}
-        />
+        {/* Dropdown เลือกวิชา */}
+        <Text style={styles.label}>วิชา</Text>
+        {uniqueSubjects.length === 0 ? (
+          <View style={styles.emptySubject}>
+            <Text style={styles.emptySubjectText}>⚠️ ยังไม่มีวิชาที่ลงทะเบียน กรุณาเพิ่มวิชาก่อน</Text>
+          </View>
+        ) : (
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={selectedKey}
+              onValueChange={handleSubjectSelect}
+              style={styles.picker}
+              dropdownIconColor="#888"
+            >
+              <Picker.Item label="-- เลือกวิชา --" value="" />
+              {uniqueSubjects.map((s) => (
+                <Picker.Item
+                  key={s.key}
+                  label={`${s.code}  ${s.subject}`}
+                  value={s.key}
+                />
+              ))}
+            </Picker>
+          </View>
+        )}
 
-        <Text style={styles.label}>Code</Text>
-        <TextInput
-          style={styles.input} placeholder="Code"
-          value={form.code} onChangeText={(t) => setForm({ ...form, code: t })}
-        />
-
+        {/* Room */}
         <Text style={styles.label}>Room</Text>
         <TextInput
           style={styles.input} placeholder="Room"
           value={form.room} onChangeText={(t) => setForm({ ...form, room: t })}
         />
 
+        {/* Date */}
         <Text style={styles.label}>Date</Text>
         <TouchableOpacity style={[styles.input, styles.fakeInput]} onPress={showDatePicker}>
           <Text style={[styles.fakeInputText, form.date && styles.filledText]}>
@@ -153,6 +197,7 @@ const AddExam = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
 
+        {/* Time */}
         <Text style={styles.label}>Time</Text>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <TouchableOpacity
@@ -212,6 +257,22 @@ const styles = StyleSheet.create({
   fakeTimeInput: { flex: 1, justifyContent: "center", marginBottom: 12 },
   fakeInputText: { color: "#aaa" },
   filledText: { color: "#000" },
+  pickerWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: "hidden",
+  },
+  picker: { height: 50, color: "#333" },
+  emptySubject: {
+    backgroundColor: "#fff3f3",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#ff3776",
+  },
+  emptySubjectText: { color: "#ff3776", fontSize: 13 },
   conflictBanner: {
     backgroundColor: "#fff3f3", borderWidth: 1,
     borderColor: "#ff3776", borderRadius: 10,

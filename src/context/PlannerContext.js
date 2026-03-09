@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect } from "react";
 
 import { db, auth } from "../service/firebaseconfig";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
-import { add } from "firebase/firestore/pipelines";
 import { onAuthStateChanged } from "firebase/auth";
 
 export const PlannerContext = createContext();
@@ -18,7 +17,6 @@ export const PlannerProvider = ({ children }) => {
         return unsubAuth
     }, [])
 
-    //ดึงข้อมูลจาก firebase
     useEffect(() => {
         if(!userId) {
             setTasks([])
@@ -32,7 +30,7 @@ export const PlannerProvider = ({ children }) => {
                 return {
                     id: doc.id,
                     ...item,
-                    date : item.date?.toDate ? item.date.toDate() : item.date
+                    date: item.date?.toDate ? item.date.toDate() : item.date
                 }
             })
             setTasks(data)
@@ -40,11 +38,10 @@ export const PlannerProvider = ({ children }) => {
         return () => unsub()
     }, [userId])
 
-    //เพิ่ม ลบ แก้
     const addTask = async (task) => {
         if(!userId) return
         try {
-            await addDoc(collection(db, "planner_tasks"),{...task, userId : userId})
+            await addDoc(collection(db, "planner_tasks"), { ...task, userId })
         } catch (error) {
             console.error("เกิดข้อผิดพลาดไม่สามาถเพิ่มกิจกรรมได้", error)
         }
@@ -67,7 +64,6 @@ export const PlannerProvider = ({ children }) => {
             console.error("เกิดข้อผิดพลาดในการลบกิจกรรม", error)
         }
     }
-
 
     return (
         <PlannerContext.Provider
