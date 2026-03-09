@@ -81,6 +81,7 @@ export default function AddPlannerScreen({ navigation, route }) {
     };
 
     const submit = async () => {
+        const currentUserId = auth.currentUser?.uid
 
         if (!desc || !date || !start || !end) {
             Alert.alert("Error", "สร้างไร เอาให้ครบก่อน !");
