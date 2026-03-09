@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, Alert,
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { auth } from "../service/firebaseconfig";
@@ -126,72 +127,72 @@ const AddExam = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Text style={styles.title}>Add Exam</Text>
+        <FontText style={styles.title}>Add Exam</FontText>
 
-        <Text style={styles.label}>Subject</Text>
+        <FontText style={styles.label}>Subject</FontText>
         <TextInput
           style={styles.input} placeholder="Subject"
           value={form.subject} onChangeText={(t) => setForm({ ...form, subject: t })}
         />
 
-        <Text style={styles.label}>Code</Text>
+        <FontText style={styles.label}>Code</FontText>
         <TextInput
           style={styles.input} placeholder="Code"
           value={form.code} onChangeText={(t) => setForm({ ...form, code: t })}
         />
 
-        <Text style={styles.label}>Room</Text>
+        <FontText style={styles.label}>Room</FontText>
         <TextInput
           style={styles.input} placeholder="Room"
           value={form.room} onChangeText={(t) => setForm({ ...form, room: t })}
         />
 
-        <Text style={styles.label}>Date</Text>
+        <FontText style={styles.label}>Date</FontText>
         <TouchableOpacity style={[styles.input, styles.fakeInput]} onPress={showDatePicker}>
-          <Text style={[styles.fakeInputText, form.date && styles.filledText]}>
+          <FontText style={[styles.fakeInputText, form.date && styles.filledText]}>
             {formatDate(form.date)}
-          </Text>
+          </FontText>
         </TouchableOpacity>
 
-        <Text style={styles.label}>Time</Text>
+        <FontText style={styles.label}>Time</FontText>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <TouchableOpacity
             style={[styles.input, styles.fakeTimeInput]}
             onPress={() => showTimePicker("starts")}
           >
-            <Text style={[styles.fakeInputText, form.starts && styles.filledText]}>
+            <FontText style={[styles.fakeInputText, form.starts && styles.filledText]}>
               {form.starts ? formatTime(form.starts) : "Starts"}
-            </Text>
+            </FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.input, styles.fakeTimeInput]}
             onPress={() => showTimePicker("ends")}
           >
-            <Text style={[styles.fakeInputText, form.ends && styles.filledText]}>
+            <FontText style={[styles.fakeInputText, form.ends && styles.filledText]}>
               {form.ends ? formatTime(form.ends) : "Ends"}
-            </Text>
+            </FontText>
           </TouchableOpacity>
         </View>
 
         {/* Real-time conflict warning */}
         {conflict && (
           <View style={styles.conflictBanner}>
-            <Text style={styles.conflictText}>
+            <FontText style={styles.conflictText}>
               ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)}–{formatTime(conflict.ends)})
-            </Text>
+            </FontText>
           </View>
         )}
 
         <View style={{ flexDirection: "row", gap: 12 }}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <FontText style={styles.cancelButtonText}>Cancel</FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.submitButton, conflict && styles.disabledButton]}
             onPress={handleSubmit}
             disabled={!!conflict}
           >
-            <Text style={styles.submitButtonText}>Submit</Text>
+            <FontText style={styles.submitButtonText}>Submit</FontText>
           </TouchableOpacity>
         </View>
       </View>

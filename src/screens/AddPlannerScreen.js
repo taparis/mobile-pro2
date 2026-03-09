@@ -8,6 +8,7 @@ import {
     Alert,
     Platform
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { PlannerContext } from "../context/PlannerContext";
 import { auth } from "../service/firebaseconfig";
@@ -136,7 +137,7 @@ export default function AddPlannerScreen({ navigation, route }) {
         }
 
             if(isEdit){
-                await updateTask(taskData)
+                await updateTask(taskData.id, taskData)
             }else {
                 await addTask(taskData)
             }
@@ -163,11 +164,11 @@ export default function AddPlannerScreen({ navigation, route }) {
         <View style={styles.container}>
             <View style={styles.inputContainer}>
 
-                <Text style={styles.title}>
+                <FontText style={styles.title}>
                     {isEdit ? "EDIT" : "NEW"}
-                </Text>
+                </FontText>
 
-                <Text style={styles.text}>Description</Text>
+                <FontText style={styles.text}>Description</FontText>
                 <TextInput
                     placeholder="Description"
                     style={styles.input}
@@ -175,19 +176,19 @@ export default function AddPlannerScreen({ navigation, route }) {
                     onChangeText={setDesc}
                 />
 
-                <Text style={styles.text}>Date</Text>
+                <FontText style={styles.text}>Date</FontText>
                 <TouchableOpacity style={styles.input} onPress={() => setShowDate(true)}>
-                    <Text>{formatDate(date)}</Text>
+                    <FontText>{formatDate(date)}</FontText>
                 </TouchableOpacity>
 
-                <Text style={styles.text}>Time</Text>
+                <FontText style={styles.text}>Time</FontText>
                 <View style={styles.rowtime}>
                     <TouchableOpacity style={styles.start} onPress={() => setShowStart(true)}>
-                        <Text>{formatTime(start)}</Text>
+                        <FontText>{formatTime(start)}</FontText>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.end} onPress={() => setShowEnd(true)}>
-                        <Text>{formatEnd(end)}</Text>
+                        <FontText>{formatEnd(end)}</FontText>
                     </TouchableOpacity>
                 </View>
 
@@ -198,14 +199,14 @@ export default function AddPlannerScreen({ navigation, route }) {
                     style={styles.cancelBtn}
                     onPress={isEdit ? deleteTask : () => navigation.goBack()}
                 >
-                    <Text style={{ color: "#FF4D97", fontSize: 20, fontWeight: "bold" }}>
+                    <FontText style={{ color: "#FF4D97", fontSize: 20, fontWeight: "bold" }}>
                         {isEdit ? "Delete" : "Cancel"}
-                    </Text>
+                    </FontText>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-                    <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
+                    <FontText style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
                         {isEdit ? "Save" : "Submit"}
-                    </Text>
+                    </FontText>
                 </TouchableOpacity>
             </View>
 

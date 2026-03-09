@@ -4,6 +4,7 @@ import { UserContext } from "../context/UserContext";
 import { ClassContext } from "../context/ClassContext";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
+import { FontText } from "../components/CustomFont";
 
 import { auth } from "../service/firebaseconfig";
 import { signOut } from "firebase/auth";
@@ -68,12 +69,12 @@ const Profile = ({ navigation }) => {
                     }
                 </View>
                 <View style={styles.textContainer}>
-                    <Text style={styles.nameText}>{user?.name || "Guest"}</Text>
-                    <Text style={styles.FacultyText}>{user?.faculty || "No Faculty"}</Text>
-                    <Text style={styles.majorText}>{user?.major || "No Major"}</Text>
-                    <Text style={styles.yearText}>{user?.year || "No Year"}</Text>
-                    <Text>{user.major}</Text>
-                    <Text>Year {user.year}</Text>
+                    <FontText style={styles.nameText}>{user?.name || "Guest"}</FontText>
+                    <FontText style={styles.FacultyText}>{user?.faculty || "No Faculty"}</FontText>
+                    <FontText style={styles.majorText}>{user?.major || "No Major"}</FontText>
+                    <FontText style={styles.yearText}>{user?.year || "No Year"}</FontText>
+                    <FontText>{user.major}</FontText>
+                    <FontText>Year {user.year}</FontText>
                 </View>
             </View>
 
@@ -81,22 +82,22 @@ const Profile = ({ navigation }) => {
                 style={styles.button}
                 onPress={() => navigation.navigate('EditProfile')}
             >
-                <Text style={styles.buttonText}>
+                <FontText style={styles.buttonText}>
                     Edit Profile
-                </Text>
+                </FontText>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.button}
                 onPress={handleDeleteData}
             >
-                <Text style={styles.buttonText}>
+                <FontText style={styles.buttonText}>
                     Delete All Data !
-                </Text>
+                </FontText>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.button, { backgroundColor: '#ff3776' }]} onPress={handleLogout}>
-                <Text style={[styles.buttonText, { color: '#fff', textAlign: 'center' }]}>Logout</Text>
+                <FontText style={[styles.buttonText, { color: '#fff', textAlign: 'center' }]}>Logout</FontText>
             </TouchableOpacity>
         </View>
     )

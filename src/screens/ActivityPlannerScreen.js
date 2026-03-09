@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Alert
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -48,11 +49,14 @@ export default function ActivityPlannerScreen({ navigation }) {
         )
     }
 
-    const formatData = (dateVal) => {
-        if(!dateVal) return ""
-        const d = dateVal instanceof Date ? dateVal : new Date(dateVal)
-        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
-    }
+const formatData = (dateVal) => {
+    if (!dateVal) return "ไม่ระบุวันที่";
+    
+    const d = dateVal.seconds ? new Date(dateVal.seconds * 1000) : new Date(dateVal);
+    
+    if (isNaN(d.getTime())) return dateVal;
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+};
 
     return (
         <View style={styles.container}>
@@ -62,23 +66,23 @@ export default function ActivityPlannerScreen({ navigation }) {
                 {monthsWithTasks.map(month => (
                     <View key={month} style={styles.monthSection}>
 
-                        <Text style={styles.monthTitle}>{month}</Text>
+                        <FontText style={styles.monthTitle}>{month}</FontText>
 
                         {sortTasks
                             (tasks.filter(t => t.month === month))
-                            .map(t => (
-                                <View style={styles.card} key={t.id}>
+                            .map((t, index) => (
+                                <View style={styles.card} key={t.id || index}>
 
                                     <TouchableOpacity
                                         style={styles.circle}
-                                        onPress={() => confirmDelete(t.id)}
+                                        onPress={() => confirmDelete(t.id || index)}
                                     />
 
                                     <View style={{ flex: 1 }}>
-                                        <Text style={styles.task}>{t.desc}</Text>
-                                        <Text style={styles.time}>
+                                        <FontText style={styles.task}>{t.desc}</FontText>
+                                        <FontText style={styles.time}>
                                             {formatData(t.date)}  •  {t.start}-{t.end}
-                                        </Text>
+                                        </FontText>
                                     </View>
 
                                     <TouchableOpacity
@@ -96,7 +100,7 @@ export default function ActivityPlannerScreen({ navigation }) {
                 ))}
 
                 {tasks.length === 0 && (
-                    <Text style={styles.noTask}>ไม่มีกิจกรรมตอนนี้</Text>
+                    <FontText style={styles.noTask}>ไม่มีกิจกรรมตอนนี้</FontText>
                 )}
 
             </ScrollView>
@@ -106,7 +110,7 @@ export default function ActivityPlannerScreen({ navigation }) {
                     style={styles.button}
                     onPress={() => navigation.navigate("AddPlanner")}
                 >
-                    <Text style={styles.buttonText}>Add Task</Text>
+                    <FontText style={styles.buttonText}>Add Task</FontText>
                 </TouchableOpacity>
             </View>
 

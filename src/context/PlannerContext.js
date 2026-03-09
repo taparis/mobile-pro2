@@ -20,7 +20,7 @@ export const PlannerProvider = ({ children }) => {
 
     //ดึงข้อมูลจาก firebase
     useEffect(() => {
-        if(!userId) {
+        if (!userId) {
             setTasks([])
             return
         }
@@ -28,37 +28,45 @@ export const PlannerProvider = ({ children }) => {
 
         const unsub = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => {
-                const item = doc.data()
+                const item = doc.data();
                 return {
                     id: doc.id,
                     ...item,
-                    date : item.date?.toDate ? item.date.toDate() : item.date
-                }
-            })
-            setTasks(data)
-        })
+                    date: item.date?.toDate ? item.date.toDate() : item.date
+                };
+            });
+            setTasks(data);
+        });
         return () => unsub()
     }, [userId])
 
     //เพิ่ม ลบ แก้
     const addTask = async (task) => {
-        if(!userId) return
+        if (!userId) return
         try {
-            await addDoc(collection(db, "planner_tasks"),{...task, userId : userId})
+            await addDoc(collection(db, "planner_tasks"), { ...task, userId: userId })
         } catch (error) {
             console.error("เกิดข้อผิดพลาดไม่สามาถเพิ่มกิจกรรมได้", error)
         }
     }
 
-    const updateTask = async (updated) => {
+    const updateTask = async (id, updated) => {
         try {
-            const taskRef = doc(db, "planner_tasks", updated.id)
-            const { id, ...dataToUpdate } = updated
-            await updateDoc(taskRef, dataToUpdate)
+            if (!id) return;
+
+            setTasks(prevTasks => {
+                return prevTasks.map(t => t.id === id ? { ...t, ...updated } : t);
+            });
+
+            const { id: _, ...dataToUpdate } = updated;
+            const taskRef = doc(db, "planner_tasks", id);
+
+            await updateDoc(taskRef, dataToUpdate);
+            console.log("Firebase Updated!");
         } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการ update", error)
+            console.error("Update error:", error);
         }
-    }
+    };
 
     const removeTask = async (id) => {
         try {
