@@ -138,7 +138,7 @@ const MainTab = () => (
     <Tab.Screen
       name="Dashboard"
       component={Dashboard}
-      options={{ title: "Dashboard", headerTitleStyle: { fontWeight: "bold", fontSize: 30 } }} />
+      options={{ title: "Dashboard", headerTitleStyle: { fontWeight: "bold", fontSize: 30,fontFamily: "Kanit-Regular", } }} />
     <Tab.Screen
       name="TimeTable"
       component={TimeTableStackNavigator}

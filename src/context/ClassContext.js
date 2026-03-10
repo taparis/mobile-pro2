@@ -1,6 +1,6 @@
 import React, { createContext, useReducer, useState, useEffect } from "react";
 
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../service/firebaseconfig";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -39,7 +39,14 @@ export const ClassProvider = ({ children }) => {
 
   const deleteClass = async (id) => {
     try {
-      await deleteDoc(doc(db, "classes", id))
+      // ลบ planner_tasks ที่ผูกกับวิชานี้ทั้งหมด
+      const qTasks = query(collection(db, "planner_tasks"), where("subjectId", "==", id));
+      const snapshot = await getDocs(qTasks);
+      const deletePromises = snapshot.docs.map(d => deleteDoc(doc(db, "planner_tasks", d.id)));
+      await Promise.all(deletePromises);
+
+      // ลบวิชา
+      await deleteDoc(doc(db, "classes", id));
     } catch (error) {
       console.error("เกิดข้อผิดพลาดไม่สามารถลบได้", error)
     }

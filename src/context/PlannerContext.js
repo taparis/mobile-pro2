@@ -118,6 +118,24 @@ export const PlannerProvider = ({ children }) => {
 
   };
 
+  const toggleTask = async (task) => {
+
+    try {
+
+      const ref = doc(db, "planner_tasks", task.id);
+
+      await updateDoc(ref, {
+        completed: !task.completed
+      });
+
+    } catch (error) {
+
+      console.error("เปลี่ยนสถานะ task ไม่ได้", error);
+
+    }
+
+  };
+
 
   return (
     <PlannerContext.Provider
@@ -125,7 +143,8 @@ export const PlannerProvider = ({ children }) => {
         tasks,
         addTask,
         updateTask,
-        removeTask
+        removeTask,
+        toggleTask
       }}
     >
       {children}
