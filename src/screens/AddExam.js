@@ -1,0 +1,298 @@
+import React, { useState, useContext } from "react";
+import {
+  View, Text, StyleSheet, TextInput,
+  TouchableOpacity, Alert,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { ClassContext } from "../context/ClassContext";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { auth } from "../service/firebaseconfig";
+import { FontText } from "../components/CustomFont";
+
+// เปรียบเทียบแค่ HH:MM
+const toMinutes = (t) => {
+  const d = new Date(t);
+  return d.getHours() * 60 + d.getMinutes();
+};
+
+const isSameDate = (a, b) => {
+  const da = new Date(a), db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+};
+
+const isTimeOverlap = (sA, eA, sB, eB) => {
+  return toMinutes(sA) < toMinutes(eB) && toMinutes(sB) < toMinutes(eA);
+};
+
+const AddExam = ({ navigation }) => {
+  const { exams, addExam, classes } = useContext(ClassContext);
+
+  const examedCodes = new Set(exams.map((e) => e.code));
+
+  const uniqueSubjects = classes.reduce((acc, c) => {
+    const key = `${c.code}__${c.subject}`;
+    if (!acc.find((x) => x.key === key) && !examedCodes.has(c.code)) {
+      acc.push({ key, subject: c.subject, code: c.code });
+    }
+    return acc;
+  }, []);
+
+  const [form, setForm] = useState({
+    subject: "",
+    code: "",
+    room: "",
+    date: null,
+    starts: null,
+    ends: null,
+    type: "exams",
+  });
+
+  // เมื่อเลือกวิชาจาก dropdown → ใส่ subject + code อัตโนมัติ
+  const handleSubjectSelect = (key) => {
+    if (!key) {
+      setForm({ ...form, subject: "", code: "" });
+      return;
+    }
+    const found = uniqueSubjects.find((x) => x.key === key);
+    if (found) {
+      setForm({ ...form, subject: found.subject, code: found.code });
+    }
+  };
+
+  const selectedKey = uniqueSubjects.find(
+    (x) => x.subject === form.subject && x.code === form.code
+  )?.key || "";
+
+  const formatDate = (date) => {
+    if (!date) return "Select date";
+    return new Date(date).toLocaleDateString("th-TH");
+  };
+
+  const formatTime = (time) => {
+    if (!time) return "--:--";
+    return new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const checkConflict = () => {
+    if (!form.date || !form.starts || !form.ends) return null;
+    return exams.find((e) =>
+      e.code !== form.code &&  // ← เพิ่มบรรทัดนี้
+      e.date && e.starts && e.ends &&
+      isSameDate(form.date, e.date) &&
+      isTimeOverlap(form.starts, form.ends, e.starts, e.ends)
+    );
+  };
+
+  const handleSubmit = async () => {
+    if (!form.subject || !form.code) {
+      Alert.alert("ข้อมูลไม่ครบ", "กรุณาเลือกวิชา");
+      return;
+    }
+    if (!form.date || !form.starts || !form.ends) {
+      Alert.alert("ข้อมูลไม่ครบ", "กรุณาเลือกวันและเวลา");
+      return;
+    }
+    if (toMinutes(form.starts) >= toMinutes(form.ends)) {
+      Alert.alert("เวลาไม่ถูกต้อง", "เวลาเริ่มต้องน้อยกว่าเวลาสิ้นสุด");
+      return;
+    }
+    const conflict = checkConflict();
+    if (conflict) {
+      Alert.alert(
+        "เวลาชนกัน!",
+        `วิชา "${conflict.subject}" (${formatTime(conflict.starts)}–${formatTime(conflict.ends)}) ถูกลงในช่วงเวลานี้แล้ว`
+      );
+      return;
+    }
+
+    try {
+      const currentUserId = auth.currentUser?.uid;
+      if (!currentUserId) {
+        Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่");
+        return;
+      }
+
+      await addExam({
+        ...form,
+        date: form.date,
+        starts: form.starts,
+        ends: form.ends,
+        userId: currentUserId,
+      });
+      navigation.goBack();
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "ไม่สามารถบันทึกการสอบได้");
+    }
+  };
+
+  const showDatePicker = () => {
+    DateTimePickerAndroid.open({
+      value: form.date ? new Date(form.date) : new Date(),
+      onChange: (event, selectedDate) => {
+        if (selectedDate) setForm({ ...form, date: selectedDate });
+      },
+      mode: "date",
+      is24Hour: true,
+    });
+  };
+
+  const showTimePicker = (field) => {
+    DateTimePickerAndroid.open({
+      value: form[field] ? new Date(form[field]) : new Date(),
+      onChange: (event, selectedTime) => {
+        if (selectedTime) setForm({ ...form, [field]: selectedTime });
+      },
+      mode: "time",
+      is24Hour: true,
+    });
+  };
+
+  const conflict = checkConflict();
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.inputContainer}>
+        <FontText style={styles.title}>Add Exam</FontText>
+
+        {/* Dropdown เลือกวิชา */}
+        <Text style={styles.label}>วิชา</Text>
+        {uniqueSubjects.length === 0 ? (
+          <View style={styles.emptySubject}>
+            <Text style={styles.emptySubjectText}>ทุกวิชามีตารางสอบครบแล้ว</Text>
+          </View>
+        ) : (
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={selectedKey}
+              onValueChange={handleSubjectSelect}
+              style={styles.picker}
+              dropdownIconColor="#888"
+            >
+              <Picker.Item label="-- เลือกวิชา --" value="" />
+              {uniqueSubjects.map((s) => (
+                <Picker.Item
+                  key={s.key}
+                  label={`${s.code}  ${s.subject}`}
+                  value={s.key}
+                />
+              ))}
+            </Picker>
+          </View>
+        )}
+
+        {/* Room */}
+        <Text style={styles.label}>Room</Text>
+        <TextInput
+          style={styles.input} placeholder="Room"
+          value={form.room} onChangeText={(t) => setForm({ ...form, room: t })}
+        />
+
+        {/* Date */}
+        <Text style={styles.label}>Date</Text>
+        <TouchableOpacity style={[styles.input, styles.fakeInput]} onPress={showDatePicker}>
+          <FontText style={[styles.fakeInputText, form.date && styles.filledText]}>
+            {formatDate(form.date)}
+          </FontText>
+        </TouchableOpacity>
+
+        {/* Time */}
+        <Text style={styles.label}>Time</Text>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity
+            style={[styles.input, styles.fakeTimeInput]}
+            onPress={() => showTimePicker("starts")}
+          >
+            <FontText style={[styles.fakeInputText, form.starts && styles.filledText]}>
+              {form.starts ? formatTime(form.starts) : "Starts"}
+            </FontText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.input, styles.fakeTimeInput]}
+            onPress={() => showTimePicker("ends")}
+          >
+            <FontText style={[styles.fakeInputText, form.ends && styles.filledText]}>
+              {form.ends ? formatTime(form.ends) : "Ends"}
+            </FontText>
+          </TouchableOpacity>
+        </View>
+
+        {/* Real-time conflict warning */}
+        {conflict && form.date && form.starts && form.ends && (
+          <View style={styles.conflictBanner}>
+            <FontText style={styles.conflictText}>
+              ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)}–{formatTime(conflict.ends)})
+            </FontText>
+          </View>
+        )}
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+            <FontText style={styles.cancelButtonText}>Cancel</FontText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitButton, conflict && styles.disabledButton]}
+            onPress={handleSubmit}
+            disabled={!!conflict}
+          >
+            <FontText style={styles.submitButtonText}>Submit</FontText>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff", alignItems: "center" },
+  inputContainer: {
+    padding: 20, backgroundColor: "pink",
+    width: "85%", borderRadius: 30, marginTop: 20,
+  },
+  title: { fontSize: 20, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
+  label: { fontSize: 15, marginBottom: 5 },
+  input: { backgroundColor: "#fff", padding: 12, borderRadius: 12, marginBottom: 12 },
+  fakeInput: { justifyContent: "center" },
+  fakeTimeInput: { flex: 1, justifyContent: "center", marginBottom: 12 },
+  fakeInputText: { color: "#aaa" },
+  filledText: { color: "#000" },
+  pickerWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: "hidden",
+  },
+  picker: { height: 50, color: "#333" },
+  emptySubject: {
+    backgroundColor: "#fff3f3",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#ff3776",
+  },
+  emptySubjectText: { color: "#ff3776", fontSize: 13 },
+  conflictBanner: {
+    backgroundColor: "#fff3f3", borderWidth: 1,
+    borderColor: "#ff3776", borderRadius: 10,
+    padding: 10, marginBottom: 10,
+  },
+  conflictText: { color: "#ff3776", fontSize: 13, fontWeight: "500" },
+  cancelButton: {
+    flex: 1, padding: 12, marginTop: 12,
+    backgroundColor: "#ff9cbb", borderRadius: 60, alignItems: "center",
+  },
+  submitButton: {
+    flex: 1, padding: 12, marginTop: 12,
+    backgroundColor: "#ff6d9b", borderRadius: 60, alignItems: "center",
+  },
+  disabledButton: { backgroundColor: "#ccc" },
+  cancelButtonText: { fontSize: 16, fontWeight: "bold", color: "#ff3776" },
+  submitButtonText: { fontSize: 16, fontWeight: "bold", color: "#fff" },
+});
+
+export default AddExam;
