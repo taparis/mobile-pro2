@@ -59,13 +59,17 @@ export default function AddPlannerScreen({ navigation, route }) {
                 setSubjectId(null);
             }
 
-            const [d, m, y] = editingTask.date.split("/").map(Number);
-            const [sh, sm] = editingTask.start.split(":").map(Number);
-            const [eh, em] = editingTask.end.split(":").map(Number);
+            if (editingTask.date && editingTask.start && editingTask.end) {
 
-            setDate(new Date(y, m - 1, d));
-            setStart(new Date(y, m - 1, d, sh, sm));
-            setEnd(new Date(y, m - 1, d, eh, em));
+                const [d, m, y] = editingTask.date.split("/").map(Number);
+                const [sh, sm] = editingTask.start.split(":").map(Number);
+                const [eh, em] = editingTask.end.split(":").map(Number);
+
+                setDate(new Date(y, m - 1, d));
+                setStart(new Date(y, m - 1, d, sh, sm));
+                setEnd(new Date(y, m - 1, d, eh, em));
+
+            }
         }
     }, []);
 

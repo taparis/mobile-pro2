@@ -44,7 +44,10 @@ const getFilteredData = (data, range, type = "class") => {
       itemDate = new Date(item.date);
     }
 
-    if (!itemDate) return false;
+    if (!itemDate) {
+      if (type === "task") return true;
+      return false;
+    }
     itemDate.setHours(0, 0, 0, 0);
 
     if (range === "today") {
@@ -102,18 +105,39 @@ const Dashboard = ({ navigation }) => {
   const nextExam = filteredExams[0] || null;
   const sortedTasks = [...filteredTasks].sort((a, b) => {
     if (a.completed !== b.completed) return a.completed ? 1 : -1;
+
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+
     const [da, ma, ya] = a.date.split("/").map(Number);
     const [db, mb, yb] = b.date.split("/").map(Number);
-    const [ha, mina] = a.start.split(":").map(Number);
-    const [hb, minb] = b.start.split(":").map(Number);
-    return new Date(ya, ma-1, da, ha, mina) - new Date(yb, mb-1, db, hb, minb);
+
+    const [ha, mina] = (a.start || "00:00").split(":").map(Number);
+    const [hb, minb] = (b.start || "00:00").split(":").map(Number);
+
+    return new Date(ya, ma - 1, da, ha, mina) - new Date(yb, mb - 1, db, hb, minb);
   });
 
+  // const getDaysDiff = (dateStr) => {
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0);
+  //   const target = new Date(dateStr);
+  //   target.setHours(0, 0, 0, 0);
+  //   return Math.round((target - today) / 86400000);
+  // };
+
   const getDaysDiff = (dateStr) => {
+    if (!dateStr) return null;
+
+    const [d, m, y] = dateStr.split("/").map(Number);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const target = new Date(dateStr);
+
+    const target = new Date(y, m - 1, d);
     target.setHours(0, 0, 0, 0);
+
     return Math.round((target - today) / 86400000);
   };
 
@@ -127,12 +151,7 @@ const Dashboard = ({ navigation }) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     const newTask = {
-      desc: quickTask,
-      date: dateStr,
-      start: "00:00",
-      end: "23:59",
-      month: months[now.getMonth()],
-      timestamp: now,
+      desc: quickTask
     };
 
     try {
@@ -141,6 +160,23 @@ const Dashboard = ({ navigation }) => {
     } catch (error) {
       Alert.alert("Error", "ไม่สามารถเพิ่มกิจกรรมได้");
     }
+  };
+
+  const formatTaskDate = (dateStr) => {
+    if (!dateStr) return "";
+
+    const [d, m, y] = dateStr.split("/").map(Number);
+
+    const today = new Date();
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    const target = new Date(y, m - 1, d);
+
+    if (target.getTime() === todayMidnight.getTime()) {
+      return "วันนี้";
+    }
+
+    return dateStr;
   };
 
   return (
@@ -215,20 +251,38 @@ const Dashboard = ({ navigation }) => {
                   <FontText style={[styles.taskTitle, t.completed && styles.completedTask]}>
                     {t.desc}
                   </FontText>
+
                   {t.subjectName && (
                     <FontText style={styles.subjectTag}>{t.subjectName}</FontText>
                   )}
-                  <View style={styles.taskRow}>
-                    <Ionicons name="calendar-outline" size={14} color="#ff6d9b" />
-                    <FontText style={styles.taskSubText}>{t.date}</FontText>
-                  </View>
-                  <View style={styles.taskRow}>
-                    <Ionicons name="time-outline" size={14} color="#ff6d9b" />
-                    <FontText style={styles.taskSubText}>{t.start} - {t.end}</FontText>
-                  </View>
+
+                  {/* แสดงวันที่ ถ้ามี */}
+                  {t.date && (
+                    <View style={styles.taskRow}>
+                      <Ionicons name="calendar-outline" size={14} color="#ff6d9b" />
+                      <FontText style={styles.taskSubText}>{t.date}</FontText>
+                    </View>
+                  )}
+
+                  {/* แสดงเวลา ถ้ามี */}
+                  {(t.start || t.end) && (
+                    <View style={styles.taskRow}>
+                      <Ionicons name="time-outline" size={14} color="#ff6d9b" />
+                      <FontText style={styles.taskSubText}>
+                        {t.start || "--:--"} - {t.end || "--:--"}
+                      </FontText>
+                    </View>
+                  )}
                 </View>
+
                 <View style={{ alignItems: "center", gap: 6 }}>
-                  <FontText style={styles.daysLabel}>{daysLabel(getDaysDiff(t.date, true))}</FontText>
+                  {/* แสดง daysLabel เฉพาะเมื่อมี date */}
+                  {t.date && (
+                    <FontText style={styles.daysLabel}>
+                      {daysLabel(getDaysDiff(t.date))}
+                    </FontText>
+                  )}
+
                   {t.completed && (
                     <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
                   )}

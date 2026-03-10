@@ -11,27 +11,27 @@ import { FontText } from "../components/CustomFont";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
 
+
 const sortTasks = (list) => {
+  return [...list].sort((a, b) => {
 
-    return [...list].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
 
-        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
 
-        if (!a.date || !b.date) return 0;
+    const [da, ma, ya] = a.date.split("/").map(Number);
+    const [db, mb, yb] = b.date.split("/").map(Number);
 
-        const [da, ma, ya] = a.date.split("/").map(Number);
-        const [db, mb, yb] = b.date.split("/").map(Number);
+    const [ha, mina] = (a.start || "00:00").split(":").map(Number);
+    const [hb, minb] = (b.start || "00:00").split(":").map(Number);
 
-        const [ha, mina] = a.start.split(":").map(Number);
-        const [hb, minb] = b.start.split(":").map(Number);
+    const dateA = new Date(ya, ma - 1, da, ha, mina);
+    const dateB = new Date(yb, mb - 1, db, hb, minb);
 
-        const dateA = new Date(ya, ma - 1, da, ha, mina);
-        const dateB = new Date(yb, mb - 1, db, hb, minb);
-
-        return dateA.getTime() - dateB.getTime();
-
-    });
-
+    return dateA.getTime() - dateB.getTime();
+  });
 };
 
 
@@ -106,7 +106,7 @@ export default function ActivityPlannerScreen({ navigation }) {
                                     )}
                                 </TouchableOpacity>
 
-                                <View style={{ flex: 1 }}>
+                                {/* <View style={{ flex: 1 }}>
 
                                     <View>
 
@@ -128,6 +128,35 @@ export default function ActivityPlannerScreen({ navigation }) {
                                     <Text style={styles.time}>
                                         {t.date} • {t.start}-{t.end}
                                     </Text>
+
+                                </View> */}
+
+                                <View style={{ flex: 1 }}>
+
+                                    <View>
+                                        <Text
+                                            style={[
+                                                styles.task,
+                                                t.completed && styles.completedTask
+                                            ]}
+                                        >
+                                            {t.desc}
+                                        </Text>
+
+                                        {t.subjectName && (
+                                            <Text style={styles.subject}>
+                                                {t.subjectName}
+                                            </Text>
+                                        )}
+                                    </View>
+
+                                    {(t.date || t.start || t.end) && (
+                                        <Text style={styles.time}>
+                                            {t.date && t.date}
+                                            {t.date && (t.start || t.end) && " • "}
+                                            {(t.start || t.end) && `${t.start || "--:--"}-${t.end || "--:--"}`}
+                                        </Text>
+                                    )}
 
                                 </View>
 
