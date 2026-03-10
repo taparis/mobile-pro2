@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { PlannerContext } from "../context/PlannerContext";
+import { FontText } from "../components/CustomFont";
 
 const toMinutes = (t) => {
     const d = new Date(t);

@@ -73,9 +73,7 @@ const Profile = ({ navigation }) => {
                     <FontText style={styles.nameText}>{user?.name || "Guest"}</FontText>
                     <FontText style={styles.FacultyText}>{user?.faculty || "No Faculty"}</FontText>
                     <FontText style={styles.majorText}>{user?.major || "No Major"}</FontText>
-                    <FontText style={styles.yearText}>{user?.year || "No Year"}</FontText>
-                    <FontText>{user.major}</FontText>
-                    <FontText>Year {user.year}</FontText>
+                    <FontText style={styles.yearText}>Year {user?.year || "No Year"}</FontText>
                 </View>
             </View>
 
