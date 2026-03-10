@@ -13,25 +13,25 @@ import { Ionicons } from "@expo/vector-icons";
 
 
 const sortTasks = (list) => {
-  return [...list].sort((a, b) => {
+    return [...list].sort((a, b) => {
 
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
 
-    if (!a.date && !b.date) return 0;
-    if (!a.date) return 1;
-    if (!b.date) return -1;
+        if (!a.date && !b.date) return 0;
+        if (!a.date) return 1;
+        if (!b.date) return -1;
 
-    const [da, ma, ya] = a.date.split("/").map(Number);
-    const [db, mb, yb] = b.date.split("/").map(Number);
+        const [da, ma, ya] = a.date.split("/").map(Number);
+        const [db, mb, yb] = b.date.split("/").map(Number);
 
-    const [ha, mina] = (a.start || "00:00").split(":").map(Number);
-    const [hb, minb] = (b.start || "00:00").split(":").map(Number);
+        const [ha, mina] = (a.start || "00:00").split(":").map(Number);
+        const [hb, minb] = (b.start || "00:00").split(":").map(Number);
 
-    const dateA = new Date(ya, ma - 1, da, ha, mina);
-    const dateB = new Date(yb, mb - 1, db, hb, minb);
+        const dateA = new Date(ya, ma - 1, da, ha, mina);
+        const dateB = new Date(yb, mb - 1, db, hb, minb);
 
-    return dateA.getTime() - dateB.getTime();
-  });
+        return dateA.getTime() - dateB.getTime();
+    });
 };
 
 
@@ -41,11 +41,13 @@ const groupTasksByMonth = (tasks) => {
 
     tasks.forEach(task => {
 
-        if (!grouped[task.month]) {
-            grouped[task.month] = [];
+        const monthName = task.month || "ไม่ได้กำหนด";
+
+        if (!grouped[monthName]) {
+            grouped[monthName] = [];
         }
 
-        grouped[task.month].push(task);
+        grouped[monthName].push(task);
 
     });
 
@@ -105,31 +107,6 @@ export default function ActivityPlannerScreen({ navigation }) {
                                         <Ionicons name="checkmark" size={14} color="#fff" />
                                     )}
                                 </TouchableOpacity>
-
-                                {/* <View style={{ flex: 1 }}>
-
-                                    <View>
-
-                                        <Text style={[
-                                            styles.task,
-                                            t.completed && styles.completedTask
-                                        ]}>
-                                            {t.desc}
-                                        </Text>
-
-                                        {t.subjectName && (
-                                            <Text style={styles.subject}>
-                                                {t.subjectName}
-                                            </Text>
-                                        )}
-
-                                    </View>
-
-                                    <Text style={styles.time}>
-                                        {t.date} • {t.start}-{t.end}
-                                    </Text>
-
-                                </View> */}
 
                                 <View style={{ flex: 1 }}>
 
