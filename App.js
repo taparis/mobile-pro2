@@ -21,6 +21,10 @@ import EditExam from "./src/screens/EditExam";
 import Register from "./src/screens/Register";
 import Login from "./src/screens/Login";
 
+//font
+import { useFonts } from 'expo-font';
+import { Kanit_400Regular, Kanit_700Bold } from '@expo-google-fonts/kanit';
+
 // Context Providers
 import { ClassProvider } from "./src/context/ClassContext";
 import { UserContext, UserProvider } from "./src/context/UserContext";
@@ -179,6 +183,18 @@ const AppContent = () => {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'Kanit-Regular': Kanit_400Regular,
+    'Kanit-Bold': Kanit_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="pink" />
+      </View>
+    );
+  }
   return (
     <UserProvider>
       <ClassProvider>

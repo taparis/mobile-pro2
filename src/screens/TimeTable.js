@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { ClassContext } from "../context/ClassContext";
 import { useIsFocused } from "@react-navigation/native";
+import { FontText } from "../components/CustomFont";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
 const DAY_BG_COLORS = ["#FFE66D", "#FFB3D1", "#B5EAD7", "#FFDAC1", "#C7CEEA"];
@@ -47,7 +48,7 @@ const TimeTable = ({ navigation }) => {
       <View style={{ width: TIME_WIDTH, backgroundColor: "#f8f8f8", borderRightWidth: 1, borderColor: "#ddd" }} />
       {DAYS.map((day, i) => (
         <View key={i} style={[styles.dayHeader, { backgroundColor: DAY_BG_COLORS[i] }]}>
-          <Text style={styles.dayHeaderText}>{day}</Text>
+          <FontText style={styles.dayHeaderText}>{day}</FontText>
         </View>
       ))}
     </View>
@@ -62,9 +63,9 @@ const TimeTable = ({ navigation }) => {
       rows.push(
         <View key={h} style={[styles.hourRow, { top }]}>
           <View style={styles.timeLabelBox}>
-            <Text style={styles.hourText}>
+            <FontText style={styles.hourText}>
               {String(actualHour).padStart(2, "0")}:00
-            </Text>
+            </FontText>
           </View>
           <View style={styles.hourLine} />
         </View>
@@ -101,10 +102,10 @@ const renderBlocks = () =>
           { left: left + 3, top, height, width: DAY_WIDTH - 7, backgroundColor: blockColor },
         ]}
       >
-        <Text style={styles.classBlockCode} numberOfLines={1}>{item.code}</Text>
-        <Text style={styles.classBlockText} numberOfLines={2}>{item.subject}</Text>
+        <FontText style={styles.classBlockCode} numberOfLines={1}>{item.code}</FontText>
+        <FontText style={styles.classBlockText} numberOfLines={2}>{item.subject}</FontText>
         {item.room ? (
-          <Text style={styles.classBlockRoom} numberOfLines={1}>{item.room}</Text>
+          <FontText style={styles.classBlockRoom} numberOfLines={1}>{item.room}</FontText>
         ) : null}
       </View>
     );
@@ -113,27 +114,27 @@ const renderBlocks = () =>
   return (
     <View style={styles.container}>
       <View style={styles.buttonCard}>
-        <Text style={styles.cardTitle}>Timetable</Text>
+        <FontText style={styles.cardTitle}>Timetable</FontText>
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.tabButton, mode === "class" && styles.activeTabButton]}
             onPress={() => setMode("class")}
           >
-            <Text style={styles.tabButtonText}>Class{"\n"}Schedule</Text>
+            <FontText style={styles.tabButtonText}>Class{"\n"}Schedule</FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tabButton, mode === "exams" && styles.activeTabButton]}
             onPress={() => setMode("exams")}
           >
-            <Text style={styles.tabButtonText}>Exam{"\n"}Schedule</Text>
+            <FontText style={styles.tabButtonText}>Exam{"\n"}Schedule</FontText>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.titleRow}>
-        <Text style={styles.titleText}>
+        <FontText style={styles.titleText}>
           {mode === "exams" ? "Exam Schedule" : "Class Schedule"}
-        </Text>
+        </FontText>
         <TouchableOpacity
           onPress={() => navigation.navigate(mode === "exams" ? "DetailExam" : "DetailClass")}
         >
