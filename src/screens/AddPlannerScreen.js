@@ -112,6 +112,12 @@ export default function AddPlannerScreen({ navigation, route }) {
             return;
         }
 
+
+        if (!currentUserId) {
+            Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่");
+            return;
+        }
+
         const months = [
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
@@ -125,7 +131,7 @@ export default function AddPlannerScreen({ navigation, route }) {
             end: formatEnd(end),
             month: months[date.getMonth()],
             timestamp: startDate,
-            userId : currentUserId
+            userId: currentUserId  // ✅ ใช้ได้แล้ว
         };
 
         try{
@@ -141,9 +147,9 @@ export default function AddPlannerScreen({ navigation, route }) {
             }else {
                 await addTask(taskData)
             }
-            navigation.goBack()
-        }catch(error){
-            Alert.alert("Error", "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง")
+            navigation.goBack();
+        } catch (error) {
+            Alert.alert("Error", "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
         }
     };
 
@@ -231,7 +237,6 @@ export default function AddPlannerScreen({ navigation, route }) {
                         setShowStart(false);
                         if (selected) setStart(selected);
                     }}
-
                 />
             )}
 
@@ -267,7 +272,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 10
     },
-
     input: {
         borderWidth: 1,
         borderColor: "#ccc",
