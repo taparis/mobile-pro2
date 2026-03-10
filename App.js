@@ -62,6 +62,7 @@ const TimeTableStackNavigator = () => (
       component={DetailClass}
       options={({ navigation }) => ({
         title: "Detail Class",
+        headerTitleStyle: { fontWeight: "bold", fontSize: 30 },
         headerRight: () => (
           <TouchableOpacity onPress={() => navigation.navigate("AddClass", { type: "class" })}>
             <Ionicons name="add-outline" size={28} color="black" />
@@ -108,11 +109,11 @@ const PlannerStackNavigator = () => (
     <PlannerStack.Screen
       name="AddPlanner"
       component={AddPlannerScreen}
-      options={{ title: "Add Activity & Planner" }} />
+      options={{ title: "Add Activity & Planner", headerTitleStyle: { fontWeight: "bold", fontSize: 26 } }} />
     <PlannerStack.Screen
       name="EditPlanner"
       component={AddPlannerScreen}
-      options={{ title: "Edit Activity & Planner" }} />
+      options={{ title: "Edit Activity & Planner", headerTitleStyle: { fontWeight: "bold", fontSize: 26 } }} />
   </PlannerStack.Navigator>
 );
 
