@@ -5,6 +5,7 @@ import { UserContext } from "../context/UserContext";
 import * as ImagePicker from 'expo-image-picker'
 import TextFormInput from "../components/TextFormInput";
 import SelectFormInput from "../components/SelectFormInput";
+import { FontText } from "../components/CustomFont";
 
 const EditProfile = ({ navigation }) => {
 
@@ -105,7 +106,7 @@ const EditProfile = ({ navigation }) => {
                 </View>
             </TouchableOpacity>
             <View style={styles.inputContainer}>
-                <Text style={styles.title}>Edit Profile</Text>
+                <FontText style={styles.title}>Edit Profile</FontText>
                 <TextFormInput
                     label="Fullname"
                     value={form.name}
@@ -141,13 +142,13 @@ const EditProfile = ({ navigation }) => {
                         style={styles.cancelButton}
                         onPress={() => navigation.goBack()}
                     >
-                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                        <FontText style={styles.cancelButtonText}>Cancel</FontText>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.summitButton}
                         onPress={handleRegister}
                     >
-                        <Text style={styles.summitButtonText}>Submit</Text>
+                        <FontText style={styles.summitButtonText}>Submit</FontText>
                     </TouchableOpacity>
                 </View>
             </View>

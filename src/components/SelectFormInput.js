@@ -1,11 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { FontText } from "./CustomFont";
 
 const SelectFormInput = ({ label, value, onValueChange, placeholder, options = [] }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <FontText style={styles.label}>{label}</FontText>
       <View style={styles.pickerBorder}>
         <Picker
           selectedValue={value}

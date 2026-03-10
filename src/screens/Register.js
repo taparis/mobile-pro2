@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { UserContext } from '../context/UserContext';
 import TextFormInput from "../components/TextFormInput";
 import SelectFormInput from "../components/SelectFormInput";
+import { FontText } from "../components/CustomFont";
 
 import { auth, db } from "../service/firebaseconfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -130,7 +131,7 @@ const Register = ({ navigation }) => {
             showsVerticalScrollIndicator={false}
         >
 
-            <Text style={styles.header}>Register</Text>
+            <FontText style={styles.header}>Register</FontText>
 
             <View style={styles.imageSection}>
                 <TouchableOpacity
@@ -202,16 +203,16 @@ const Register = ({ navigation }) => {
                 style={styles.button}
                 onPress={handleRegister}
             >
-                <Text style={styles.buttonText}>Register</Text>
+                <FontText style={styles.buttonText}>Register</FontText>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.login}
                 onPress={() => navigation.navigate("Login")}
             >
-                <Text style={styles.loginText}>
+                <FontText style={styles.loginText}>
                     Already have an account? Log in
-                </Text>
+                </FontText>
             </TouchableOpacity>
 
 

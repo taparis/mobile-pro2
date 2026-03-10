@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, Alert, ScrollView,
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { Picker } from "@react-native-picker/picker";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -160,28 +161,28 @@ const AddClass = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.inputContainer}>
-        <Text style={styles.title}>Add Class</Text>
+        <FontText style={styles.title}>Add Class</FontText>
 
-        <Text style={styles.label}>Subject</Text>
+        <FontText style={styles.label}>Subject</FontText>
         <TextInput
           style={styles.input} placeholder="ชื่อวิชา"
           value={subject} onChangeText={setSubject}
         />
 
-        <Text style={styles.label}>Code</Text>
+        <FontText style={styles.label}>Code</FontText>
         <TextInput
           style={styles.input} placeholder="รหัสวิชา"
           value={code} onChangeText={setCode}
         />
 
-        <Text style={styles.label}>Room</Text>
+        <FontText style={styles.label}>Room</FontText>
         <TextInput
           style={styles.input} placeholder="ห้องเรียน"
           value={room} onChangeText={setRoom}
         />
 
         {/* วันที่เรียน */}
-        <Text style={styles.label}>วันที่เรียน</Text>
+        <FontText style={styles.label}>วันที่เรียน</FontText>
         {schedules.map((row, index) => {
           const conflict = getConflict(row);
           const internalConflict = getInternalConflict(index);
@@ -211,21 +212,21 @@ const AddClass = ({ navigation }) => {
                 style={styles.timePill}
                 onPress={() => showTimePicker(index, "starts")}
               >
-                <Text style={[styles.timePillText, row.starts && styles.filledText]}>
+                <FontText style={[styles.timePillText, row.starts && styles.filledText]}>
                   {row.starts ? formatTime(row.starts) : "เริ่ม"}
-                </Text>
+                </FontText>
               </TouchableOpacity>
 
-              <Text style={styles.timeSep}>–</Text>
+              <FontText style={styles.timeSep}>–</FontText>
 
               {/* เวลาสิ้นสุด */}
               <TouchableOpacity
                 style={styles.timePill}
                 onPress={() => showTimePicker(index, "ends")}
               >
-                <Text style={[styles.timePillText, row.ends && styles.filledText]}>
+                <FontText style={[styles.timePillText, row.ends && styles.filledText]}>
                   {row.ends ? formatTime(row.ends) : "สิ้นสุด"}
-                </Text>
+                </FontText>
               </TouchableOpacity>
 
               {/* ปุ่มลบ row */}
@@ -239,12 +240,12 @@ const AddClass = ({ navigation }) => {
 
               {/* conflict warning */}
               {conflict && (
-                <Text style={styles.conflictText}>
+                <FontText style={styles.conflictText}>
                   ⚠️ ชนกับ "{conflict.subject}"
-                </Text>
+                </FontText>
               )}
               {internalConflict && (
-                <Text style={styles.conflictText}>⚠️ วันและเวลาซ้ำกันในฟอร์มนี้</Text>
+                <FontText style={styles.conflictText}>⚠️ วันและเวลาซ้ำกันในฟอร์มนี้</FontText>
               )}
             </View>
           );
@@ -253,16 +254,16 @@ const AddClass = ({ navigation }) => {
         {/* ปุ่มเพิ่มวัน */}
         <TouchableOpacity style={styles.addDayBtn} onPress={addRow}>
           <Ionicons name="add-circle-outline" size={18} color="#ff6d9b" />
-          <Text style={styles.addDayText}>เพิ่มวัน</Text>
+          <FontText style={styles.addDayText}>เพิ่มวัน</FontText>
         </TouchableOpacity>
 
         {/* Cancel / Submit */}
         <View style={{ flexDirection: "row", gap: 12 }}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <FontText style={styles.cancelButtonText}>Cancel</FontText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Submit</Text>
+            <FontText style={styles.submitButtonText}>Submit</FontText>
           </TouchableOpacity>
         </View>
       </View>

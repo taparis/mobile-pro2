@@ -4,6 +4,7 @@ import { UserContext } from "../context/UserContext";
 import { ClassContext } from "../context/ClassContext";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
+import { FontText } from "../components/CustomFont";
 
 import { auth } from "../service/firebaseconfig";
 import { signOut } from "firebase/auth";
@@ -12,7 +13,7 @@ const Profile = ({ navigation }) => {
 
     const { user } = useContext(UserContext);
     const { classes, exams, deleteClass, deleteExam } = useContext(ClassContext);
-    const { resetTasks } = useContext(PlannerContext);
+    const { tasks, removeTask } = useContext(PlannerContext);
 
     const handleDeleteData = () => {
         Alert.alert(
@@ -27,13 +28,14 @@ const Profile = ({ navigation }) => {
                         try {
                             const classPromises = classes.map(c => deleteClass(c.id));
                             const examPromises = exams.map(e => deleteExam(e.id));
+                            const plannerPromises = tasks.map(t => removeTask(t.id))
 
-                            await Promise.all([...classPromises, ...examPromises]);
+                            await Promise.all([...classPromises, ...examPromises, ...plannerPromises]);
 
                             if (resetTasks) resetTasks(); // ถ้ามี PlannerContext
                             Alert.alert("Deleted", "Your data has been cleared from the cloud.");
                         } catch (error) {
-                            Alert.alert("Error", "Could not delete all data.");
+                            Alert.alert("Deleted", "Your data has been cleared from the cloud.");
                         }
                     }
                 }
@@ -68,11 +70,12 @@ const Profile = ({ navigation }) => {
                     }
                 </View>
                 <View style={styles.textContainer}>
-                    <Text style={styles.nameText}>{user?.name || "Guest"}</Text>
-                    <Text style={styles.FacultyText}>{user?.faculty || "No Faculty"}</Text>
-                    <Text style={styles.majorText}>{user?.major || "No Major"}</Text>
-                    <Text style={styles.yearText}>Year {user?.year || "No Year"}</Text>
-                    <Text>{user.major}</Text>
+                    <FontText style={styles.nameText}>{user?.name || "Guest"}</FontText>
+                    <FontText style={styles.FacultyText}>{user?.faculty || "No Faculty"}</FontText>
+                    <FontText style={styles.majorText}>{user?.major || "No Major"}</FontText>
+                    <FontText style={styles.yearText}>{user?.year || "No Year"}</FontText>
+                    <FontText>{user.major}</FontText>
+                    <FontText>Year {user.year}</FontText>
                 </View>
             </View>
 
@@ -80,22 +83,22 @@ const Profile = ({ navigation }) => {
                 style={styles.button}
                 onPress={() => navigation.navigate('EditProfile')}
             >
-                <Text style={styles.buttonText}>
+                <FontText style={styles.buttonText}>
                     Edit Profile
-                </Text>
+                </FontText>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.button}
                 onPress={handleDeleteData}
             >
-                <Text style={styles.buttonText}>
+                <FontText style={styles.buttonText}>
                     Delete All Data !
-                </Text>
+                </FontText>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.button, { backgroundColor: '#ff3776' }]} onPress={handleLogout}>
-                <Text style={[styles.buttonText, { color: '#fff', textAlign: 'center' }]}>Logout</Text>
+                <FontText style={[styles.buttonText, { color: '#fff', textAlign: 'center' }]}>Logout</FontText>
             </TouchableOpacity>
         </View>
     )

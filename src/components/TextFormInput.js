@@ -1,10 +1,11 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
+import { FontText } from "./CustomFont";
 
 const TextFormInput = ({ label, value, onChangeText, placeholder, secureTextEntry = false }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <FontText style={styles.label}>{label}</FontText>
       <TextInput
         style={styles.input}
         value={value}

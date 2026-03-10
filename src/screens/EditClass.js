@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TextInput,
   TouchableOpacity, Alert, ScrollView,
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
@@ -39,7 +40,7 @@ const EditClass = ({ navigation, route }) => {
   if (!item) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>ไม่พบข้อมูล</Text>
+        <FontText>ไม่พบข้อมูล</FontText>
       </View>
     );
   }
@@ -129,27 +130,27 @@ const EditClass = ({ navigation, route }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.inputContainer}>
-        <Text style={styles.title}>Edit Class</Text>
+        <FontText style={styles.title}>Edit Class</FontText>
 
-        <Text style={styles.label}>Subject</Text>
+        <FontText style={styles.label}>Subject</FontText>
         <TextInput
           style={styles.input} value={form.subject}
           onChangeText={(t) => setForm({ ...form, subject: t })}
         />
 
-        <Text style={styles.label}>Code</Text>
+        <FontText style={styles.label}>Code</FontText>
         <TextInput
           style={styles.input} value={form.code}
           onChangeText={(t) => setForm({ ...form, code: t })}
         />
 
-        <Text style={styles.label}>Room</Text>
+        <FontText style={styles.label}>Room</FontText>
         <TextInput
           style={styles.input} value={form.room}
           onChangeText={(t) => setForm({ ...form, room: t })}
         />
 
-        <Text style={styles.label}>Day</Text>
+        <FontText style={styles.label}>Day</FontText>
         <View style={styles.dayRow}>
           {DAYS.map((d) => {
             const isSelected = form.dayOfWeek === d.value;
@@ -162,52 +163,52 @@ const EditClass = ({ navigation, route }) => {
                 ]}
                 onPress={() => setForm({ ...form, dayOfWeek: d.value })}
               >
-                <Text style={[styles.dayBtnText, isSelected && styles.dayBtnTextSelected]}>
+                <FontText style={[styles.dayBtnText, isSelected && styles.dayBtnTextSelected]}>
                   {d.label}
-                </Text>
+                </FontText>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        <Text style={styles.label}>Time</Text>
+        <FontText style={styles.label}>Time</FontText>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <TouchableOpacity
             style={[styles.input, styles.fakeTimeInput]}
             onPress={() => showTimePicker("starts")}
           >
-            <Text style={[styles.fakeInputText, form.starts && styles.filledText]}>
+            <FontText style={[styles.fakeInputText, form.starts && styles.filledText]}>
               {form.starts ? formatTime(form.starts) : "Starts"}
-            </Text>
+            </FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.input, styles.fakeTimeInput]}
             onPress={() => showTimePicker("ends")}
           >
-            <Text style={[styles.fakeInputText, form.ends && styles.filledText]}>
+            <FontText style={[styles.fakeInputText, form.ends && styles.filledText]}>
               {form.ends ? formatTime(form.ends) : "Ends"}
-            </Text>
+            </FontText>
           </TouchableOpacity>
         </View>
 
         {conflict && (
           <View style={styles.conflictBanner}>
-            <Text style={styles.conflictText}>
+            <FontText style={styles.conflictText}>
               ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)} - {formatTime(conflict.ends)})
-            </Text>
+            </FontText>
           </View>
         )}
 
         <View style={{ flexDirection: "row", gap: 12 }}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <FontText style={styles.cancelButtonText}>Cancel</FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.submitButton, conflict && styles.disabledButton]}
             onPress={handleSubmit}
             disabled={!!conflict}
           >
-            <Text style={styles.submitButtonText}>Save</Text>
+            <FontText style={styles.submitButtonText}>Save</FontText>
           </TouchableOpacity>
         </View>
       </View>

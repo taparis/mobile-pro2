@@ -154,7 +154,7 @@ const AddExam = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Text style={styles.title}>Add Exam</Text>
+        <FontText style={styles.title}>Add Exam</FontText>
 
         {/* Dropdown เลือกวิชา */}
         <Text style={styles.label}>วิชา</Text>
@@ -192,9 +192,9 @@ const AddExam = ({ navigation }) => {
         {/* Date */}
         <Text style={styles.label}>Date</Text>
         <TouchableOpacity style={[styles.input, styles.fakeInput]} onPress={showDatePicker}>
-          <Text style={[styles.fakeInputText, form.date && styles.filledText]}>
+          <FontText style={[styles.fakeInputText, form.date && styles.filledText]}>
             {formatDate(form.date)}
-          </Text>
+          </FontText>
         </TouchableOpacity>
 
         {/* Time */}
@@ -204,39 +204,39 @@ const AddExam = ({ navigation }) => {
             style={[styles.input, styles.fakeTimeInput]}
             onPress={() => showTimePicker("starts")}
           >
-            <Text style={[styles.fakeInputText, form.starts && styles.filledText]}>
+            <FontText style={[styles.fakeInputText, form.starts && styles.filledText]}>
               {form.starts ? formatTime(form.starts) : "Starts"}
-            </Text>
+            </FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.input, styles.fakeTimeInput]}
             onPress={() => showTimePicker("ends")}
           >
-            <Text style={[styles.fakeInputText, form.ends && styles.filledText]}>
+            <FontText style={[styles.fakeInputText, form.ends && styles.filledText]}>
               {form.ends ? formatTime(form.ends) : "Ends"}
-            </Text>
+            </FontText>
           </TouchableOpacity>
         </View>
 
         {/* Real-time conflict warning */}
         {conflict && (
           <View style={styles.conflictBanner}>
-            <Text style={styles.conflictText}>
+            <FontText style={styles.conflictText}>
               ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)}–{formatTime(conflict.ends)})
-            </Text>
+            </FontText>
           </View>
         )}
 
         <View style={{ flexDirection: "row", gap: 12 }}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <FontText style={styles.cancelButtonText}>Cancel</FontText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.submitButton, conflict && styles.disabledButton]}
             onPress={handleSubmit}
             disabled={!!conflict}
           >
-            <Text style={styles.submitButtonText}>Submit</Text>
+            <FontText style={styles.submitButtonText}>Submit</FontText>
           </TouchableOpacity>
         </View>
       </View>

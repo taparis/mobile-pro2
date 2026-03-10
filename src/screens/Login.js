@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { UserContext } from "../context/UserContext";
 import TextFormInput from "../components/TextFormInput";
+import { FontText } from "../components/CustomFont";
 
 import { auth } from "../service/firebaseconfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -40,7 +41,7 @@ const Login = ({ navigation }) => {
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.header}>Login</Text>
+      <FontText style={styles.header}>Login</FontText>
 
       <TextFormInput
         label="Email"
@@ -58,19 +59,19 @@ const Login = ({ navigation }) => {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+        <FontText style={styles.buttonText}>Login</FontText>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.registerRedirect}
         onPress={() => navigation.navigate("Register")}
       >
-        <Text style={styles.redirectText}>
+        <FontText style={styles.redirectText}>
           Don't have an account?{" "}
-          <Text style={{ color: "#ff6d9b", fontWeight: "bold" }}>
+          <FontText style={{ color: "#ff6d9b", fontWeight: "bold" }}>
             Sign Up
-          </Text>
-        </Text>
+          </FontText>
+        </FontText>
       </TouchableOpacity>
     </ScrollView>
   );

@@ -7,6 +7,7 @@ import {
   FlatList,
   Modal,
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
 
@@ -88,27 +89,27 @@ const handleDelete = async () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="document-text-outline" size={60} color="#ffb6c1" />
-            <Text style={styles.emptyText}>ยังไม่มีตารางสอบ</Text>
-            <Text style={styles.emptySubText}>กด + เพื่อเพิ่มตารางสอบ</Text>
+            <FontText style={styles.emptyText}>ยังไม่มีตารางสอบ</FontText>
+            <FontText style={styles.emptySubText}>กด + เพื่อเพิ่มตารางสอบ</FontText>
           </View>
         }
         renderItem={({ item }) => (
           <View style={styles.frame}>
             {/* กล่องซ้าย: วันในสัปดาห์ + วันที่ + เวลา */}
             <View style={[styles.dayBox, { backgroundColor: getDayColor(item.date) }]}>
-              <Text style={styles.dayText}>{getDayName(item.date)}</Text>
-              <Text style={styles.dateShort}>{formatDateShort(item.date)}</Text>
-              <Text style={styles.timeText}>{formatTime(item.starts)}</Text>
-              <Text style={styles.timeText}>{formatTime(item.ends)}</Text>
+              <FontText style={styles.dayText}>{getDayName(item.date)}</FontText>
+              <FontText style={styles.dateShort}>{formatDateShort(item.date)}</FontText>
+              <FontText style={styles.timeText}>{formatTime(item.starts)}</FontText>
+              <FontText style={styles.timeText}>{formatTime(item.ends)}</FontText>
             </View>
 
             {/* ข้อมูลวิชาสอบ */}
             <View style={styles.infoBox}>
-              <Text style={styles.codeText}>{item.code}</Text>
-              <Text style={styles.subjectText}>{item.subject}</Text>
-              <Text style={styles.roomText}>
+              <FontText style={styles.codeText}>{item.code}</FontText>
+              <FontText style={styles.subjectText}>{item.subject}</FontText>
+              <FontText style={styles.roomText}>
                 <Ionicons name="location-outline" size={13} color="#888" /> {item.room}
-              </Text>
+              </FontText>
             </View>
 
             {/* ปุ่ม edit / delete */}
@@ -128,14 +129,14 @@ const handleDelete = async () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Ionicons name="warning-outline" size={40} color="#ff3776" style={{ marginBottom: 8 }} />
-            <Text style={styles.modalTitle}>ลบตารางสอบ</Text>
-            <Text style={styles.modalText}>ต้องการลบ "{deleteTarget?.subject}"?</Text>
+            <FontText style={styles.modalTitle}>ลบตารางสอบ</FontText>
+            <FontText style={styles.modalText}>ต้องการลบ "{deleteTarget?.subject}"?</FontText>
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setDeleteTarget(null)}>
-                <Text style={styles.cancelBtnText}>ยกเลิก</Text>
+                <FontText style={styles.cancelBtnText}>ยกเลิก</FontText>
               </TouchableOpacity>
               <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-                <Text style={styles.deleteBtnText}>ลบ</Text>
+                <FontText style={styles.deleteBtnText}>ลบ</FontText>
               </TouchableOpacity>
             </View>
           </View>

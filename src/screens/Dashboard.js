@@ -9,6 +9,7 @@ import {
   Modal,
   Alert,
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { Ionicons } from "@expo/vector-icons";
 import { ClassContext } from "../context/ClassContext";
 import { PlannerContext } from "../context/PlannerContext";
@@ -136,34 +137,34 @@ const Dashboard = ({ navigation }) => {
             onPress={() => setFilterMode(mode)}
             style={[styles.filterTab, filterMode === mode && styles.activeFilterTab]}
           >
-            <Text style={[styles.filterTabText, filterMode === mode && styles.activeFilterTabText]}>
+            <FontText style={[styles.filterTabText, filterMode === mode && styles.activeFilterTabText]}>
               {mode === 'today' ? 'วันนี้' : mode === 'week' ? 'สัปดาห์นี้' : 'เดือนนี้'}
-            </Text>
+            </FontText>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* ── Next Class ── */}
       <View style={styles.cardContainer}>
-        <Text style={styles.headlabel}>Next Class</Text>
+        <FontText style={styles.headlabel}>Next Class</FontText>
         <View style={styles.card}>
           {nextClass ? (
             <>
               <View style={styles.timeRow}>
                 <View style={styles.timeBox}>
-                  <Text style={styles.timeBoxlabel}>
+                  <FontText style={styles.timeBoxlabel}>
                     {formatTime(nextClass.starts)} - {formatTime(nextClass.ends)}
-                  </Text>
+                  </FontText>
                 </View>
-                <Text style={styles.daysLabel}>{daysLabel(nextDaysUntil)}</Text>
+                <FontText style={styles.daysLabel}>{daysLabel(nextDaysUntil)}</FontText>
               </View>
-              <Text style={styles.textlabel}>ชื่อวิชา : {nextClass.subject}</Text>
-              <Text style={styles.textlabel}>ห้องที่เรียน : {nextClass.room || "-"}</Text>
+              <FontText style={styles.textlabel}>ชื่อวิชา : {nextClass.subject}</FontText>
+              <FontText style={styles.textlabel}>ห้องที่เรียน : {nextClass.room || "-"}</FontText>
             </>
           ) : (
             <View style={styles.emptyRow}>
               <Ionicons name="calendar-outline" size={20} color="#ffb6c1" />
-              <Text style={styles.emptyText}>ไม่มีคลาสเรียนในช่วงนี้</Text>
+              <FontText style={styles.emptyText}>ไม่มีคลาสเรียนในช่วงนี้</FontText>
             </View>
           )}
         </View>
@@ -171,25 +172,25 @@ const Dashboard = ({ navigation }) => {
 
       {/* ── Upcoming Exam ── */}
       <View style={styles.cardContainer}>
-        <Text style={styles.headlabel}>Upcoming Exam</Text>
+        <FontText style={styles.headlabel}>Upcoming Exam</FontText>
         <View style={styles.card}>
           {nextExam ? (
             <>
               <View style={styles.timeRow}>
                 <View style={styles.timeBox}>
-                  <Text style={styles.timeBoxlabel}>
+                  <FontText style={styles.timeBoxlabel}>
                     {formatTime(nextExam.starts)} - {formatTime(nextExam.ends)}
-                  </Text>
+                  </FontText>
                 </View>
-                <Text style={styles.daysLabel}>{daysLabel(getDaysDiff(nextExam.date))}</Text>
+                <FontText style={styles.daysLabel}>{daysLabel(getDaysDiff(nextExam.date))}</FontText>
               </View>
-              <Text style={styles.textlabel}>ชื่อวิชา : {nextExam.subject}</Text>
-              <Text style={styles.textlabel}>ห้องสอบ : {nextExam.room || "-"}</Text>
+              <FontText style={styles.textlabel}>ชื่อวิชา : {nextExam.subject}</FontText>
+              <FontText style={styles.textlabel}>ห้องสอบ : {nextExam.room || "-"}</FontText>
             </>
           ) : (
             <View style={styles.emptyRow}>
               <Ionicons name="document-text-outline" size={20} color="#ffb6c1" />
-              <Text style={styles.emptyText}>ไม่มีตารางสอบในช่วงนี้</Text>
+              <FontText style={styles.emptyText}>ไม่มีตารางสอบในช่วงนี้</FontText>
             </View>
           )}
         </View>
@@ -197,27 +198,27 @@ const Dashboard = ({ navigation }) => {
 
       {/* ── Your Task ── */}
       <View style={styles.cardContainer}>
-        <Text style={styles.headlabel}>Your Task</Text>
+        <FontText style={styles.headlabel}>Your Task</FontText>
         <View style={styles.card}>
           {!nextTask ? (
             <View style={styles.emptyRow}>
               <Ionicons name="clipboard-outline" size={20} color="#ffb6c1" />
-              <Text style={styles.emptyText}>ยังไม่มี Task ในช่วงนี้</Text>
+              <FontText style={styles.emptyText}>ยังไม่มี Task ในช่วงนี้</FontText>
             </View>
           ) : (
             <View style={styles.taskCard}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.taskTitle}>{nextTask.desc}</Text>
+                <FontText style={styles.taskTitle}>{nextTask.desc}</FontText>
                 <View style={styles.taskRow}>
                   <Ionicons name="calendar-outline" size={14} color="#ff6d9b" />
-                  <Text style={styles.taskSubText}>{nextTask.date}</Text>
+                  <FontText style={styles.taskSubText}>{nextTask.date}</FontText>
                 </View>
                 <View style={styles.taskRow}>
                   <Ionicons name="time-outline" size={14} color="#ff6d9b" />
-                  <Text style={styles.taskSubText}>{nextTask.start} - {nextTask.end}</Text>
+                  <FontText style={styles.taskSubText}>{nextTask.start} - {nextTask.end}</FontText>
                 </View>
               </View>
-              <Text style={styles.daysLabel}>{daysLabel(getDaysDiff(nextTask.date, true))}</Text>
+              <FontText style={styles.daysLabel}>{daysLabel(getDaysDiff(nextTask.date, true))}</FontText>
             </View>
           )}
         </View>
@@ -228,7 +229,7 @@ const Dashboard = ({ navigation }) => {
           style={styles.button}
           onPress={() => navigation.navigate("Planner", { screen: "AddPlanner" })}
         >
-          <Text style={styles.buttonText}>Add Task</Text>
+          <FontText style={styles.buttonText}>Add Task</FontText>
         </TouchableOpacity>
       </View>
     </ScrollView>
