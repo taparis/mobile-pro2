@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         backgroundColor: '#fff',
         alignItems: 'center',
-        padding: 15
+        padding: 50
     },
     textContainer: {
         flexDirection: 'column',
