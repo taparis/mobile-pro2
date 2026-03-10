@@ -7,6 +7,7 @@ import { Picker } from "@react-native-picker/picker";
 import { ClassContext } from "../context/ClassContext";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { auth } from "../service/firebaseconfig";
+import { FontText } from "../components/CustomFont";
 
 // เปรียบเทียบแค่ HH:MM
 const toMinutes = (t) => {
