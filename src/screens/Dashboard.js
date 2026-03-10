@@ -84,6 +84,7 @@ const getNextClass = (classes, range) => {
 };
 
 const daysLabel = (d) => {
+  if (d === null || isNaN(d)) return "ไม่มีกำหนด"
   if (d === 0) return "วันนี้";
   if (d === 1) return "พรุ่งนี้";
   return `อีก ${d} วัน`;

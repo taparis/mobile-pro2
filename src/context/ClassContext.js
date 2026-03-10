@@ -19,7 +19,7 @@ export const ClassProvider = ({ children }) => {
   }, [])
   //เพิ่ม ลบ แก้
   const addClass = async (payload) => {
-    if(!userId) return
+    if (!userId) return
     try {
       await addDoc(collection(db, "classes"), { ...payload, userId })
     } catch (error) {
@@ -39,14 +39,24 @@ export const ClassProvider = ({ children }) => {
 
   const deleteClass = async (id) => {
     try {
-      // ลบ planner_tasks ที่ผูกกับวิชานี้ทั้งหมด
-      const qTasks = query(collection(db, "planner_tasks"), where("subjectId", "==", id));
-      const snapshot = await getDocs(qTasks);
-      const deletePromises = snapshot.docs.map(d => deleteDoc(doc(db, "planner_tasks", d.id)));
-      await Promise.all(deletePromises);
+      // หา code ของวิชาที่จะลบ
+      const targetClass = classes.find((c) => c.id === id);
 
       // ลบวิชา
       await deleteDoc(doc(db, "classes", id));
+
+      // ถ้ายังมีวิชา code เดียวกันเหลืออยู่ ไม่ต้องลบ exam
+      const sameCodeLeft = classes.filter(
+        (c) => c.id !== id && c.code === targetClass?.code
+      );
+
+      if (targetClass && sameCodeLeft.length === 0) {
+        // ลบ exam ที่ code ตรงกันทั้งหมด
+        const examsToDelete = exams.filter((e) => e.code === targetClass.code);
+        await Promise.all(
+          examsToDelete.map((e) => deleteDoc(doc(db, "exams", e.id)))
+        );
+      }
     } catch (error) {
       console.error("เกิดข้อผิดพลาดไม่สามารถลบได้", error)
     }
@@ -79,9 +89,9 @@ export const ClassProvider = ({ children }) => {
   }
   //ดึงข้อมูลจาก  จาก firebase
   useEffect(() => {
-    if(!userId){
+    if (!userId) {
       setClasses([]),
-      setExams([])
+        setExams([])
       return
     }
 
@@ -100,7 +110,7 @@ export const ClassProvider = ({ children }) => {
       setClasses(data);
     });
 
-    const qExams = query(collection(db, "exams"), where ("userId", "==", userId));
+    const qExams = query(collection(db, "exams"), where("userId", "==", userId));
     const unsubExams = onSnapshot(qExams, (snapshot) => {
       const data = snapshot.docs.map((doc) => {
         const item = doc.data();

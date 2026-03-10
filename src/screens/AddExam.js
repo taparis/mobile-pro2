@@ -31,10 +31,11 @@ const isTimeOverlap = (sA, eA, sB, eB) => {
 const AddExam = ({ navigation }) => {
   const { exams, addExam, classes } = useContext(ClassContext);
 
-  // ดึงรายวิชาที่ไม่ซ้ำจาก classes (subject + code)
+  const examedCodes = new Set(exams.map((e) => e.code));
+
   const uniqueSubjects = classes.reduce((acc, c) => {
     const key = `${c.code}__${c.subject}`;
-    if (!acc.find((x) => x.key === key)) {
+    if (!acc.find((x) => x.key === key) && !examedCodes.has(c.code)) {
       acc.push({ key, subject: c.subject, code: c.code });
     }
     return acc;
@@ -79,6 +80,7 @@ const AddExam = ({ navigation }) => {
   const checkConflict = () => {
     if (!form.date || !form.starts || !form.ends) return null;
     return exams.find((e) =>
+      e.code !== form.code &&  // ← เพิ่มบรรทัดนี้
       e.date && e.starts && e.ends &&
       isSameDate(form.date, e.date) &&
       isTimeOverlap(form.starts, form.ends, e.starts, e.ends)
@@ -161,7 +163,7 @@ const AddExam = ({ navigation }) => {
         <Text style={styles.label}>วิชา</Text>
         {uniqueSubjects.length === 0 ? (
           <View style={styles.emptySubject}>
-            <Text style={styles.emptySubjectText}>⚠️ ยังไม่มีวิชาที่ลงทะเบียน กรุณาเพิ่มวิชาก่อน</Text>
+            <Text style={styles.emptySubjectText}>ทุกวิชามีตารางสอบครบแล้ว</Text>
           </View>
         ) : (
           <View style={styles.pickerWrapper}>
@@ -220,7 +222,7 @@ const AddExam = ({ navigation }) => {
         </View>
 
         {/* Real-time conflict warning */}
-        {conflict && (
+        {conflict && form.date && form.starts && form.ends && (
           <View style={styles.conflictBanner}>
             <FontText style={styles.conflictText}>
               ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)}–{formatTime(conflict.ends)})
