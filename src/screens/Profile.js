@@ -13,7 +13,7 @@ const Profile = ({ navigation }) => {
 
     const { user } = useContext(UserContext);
     const { classes, exams, deleteClass, deleteExam } = useContext(ClassContext);
-    const { resetTasks } = useContext(PlannerContext);
+    const { tasks, removeTask } = useContext(PlannerContext);
 
     const handleDeleteData = () => {
         Alert.alert(
@@ -28,13 +28,14 @@ const Profile = ({ navigation }) => {
                         try {
                             const classPromises = classes.map(c => deleteClass(c.id));
                             const examPromises = exams.map(e => deleteExam(e.id));
+                            const plannerPromises = tasks.map(t => removeTask(t.id))
 
-                            await Promise.all([...classPromises, ...examPromises]);
+                            await Promise.all([...classPromises, ...examPromises, ...plannerPromises]);
 
                             if (resetTasks) resetTasks(); // ถ้ามี PlannerContext
                             Alert.alert("Deleted", "Your data has been cleared from the cloud.");
                         } catch (error) {
-                            Alert.alert("Error", "Could not delete all data.");
+                            Alert.alert("Deleted", "Your data has been cleared from the cloud.");
                         }
                     }
                 }

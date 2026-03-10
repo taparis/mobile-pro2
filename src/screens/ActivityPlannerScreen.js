@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Alert
 } from "react-native";
+import { FontText } from "../components/CustomFont";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -85,7 +86,7 @@ export default function ActivityPlannerScreen({ navigation }) {
 
                     <View key={month} style={styles.monthSection}>
 
-                        <Text style={styles.monthTitle}>{month}</Text>
+                        <FontText style={styles.monthTitle}>{month}</FontText>
 
                         {sortTasks(groupedTasks[month]).map(t => (
 
@@ -130,9 +131,9 @@ export default function ActivityPlannerScreen({ navigation }) {
 
 
                 {tasks.length === 0 && (
-                    <Text style={styles.noTask}>
+                    <FontText style={styles.noTask}>
                         ไม่มีกิจกรรมตอนนี้
-                    </Text>
+                    </FontText>
                 )}
 
             </ScrollView>
@@ -144,9 +145,9 @@ export default function ActivityPlannerScreen({ navigation }) {
                     style={styles.button}
                     onPress={() => navigation.navigate("AddPlanner")}
                 >
-                    <Text style={styles.buttonText}>
+                    <FontText style={styles.buttonText}>
                         Add Task
-                    </Text>
+                    </FontText>
                 </TouchableOpacity>
 
             </View>

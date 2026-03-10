@@ -173,11 +173,11 @@ export default function AddPlannerScreen({ navigation, route }) {
 
             <View style={styles.inputContainer}>
 
-                <Text style={styles.title}>
+                <FontText style={styles.title}>
                     {isEdit ? "EDIT" : "NEW"}
-                </Text>
+                </FontText>
 
-                <Text style={styles.text}>Description</Text>
+                <FontText style={styles.text}>Description</FontText>
 
                 <TextInput
                     placeholder="Description"
@@ -186,16 +186,16 @@ export default function AddPlannerScreen({ navigation, route }) {
                     onChangeText={setDesc}
                 />
 
-                <Text style={styles.text}>Date</Text>
+                <FontText style={styles.text}>Date</FontText>
 
                 <TouchableOpacity
                     style={styles.input}
                     onPress={() => setShowDate(true)}
                 >
-                    <Text>{formatDate(date)}</Text>
+                    <FontText>{formatDate(date)}</FontText>
                 </TouchableOpacity>
 
-                <Text style={styles.text}>Time</Text>
+                <FontText style={styles.text}>Time</FontText>
 
                 <View style={styles.rowtime}>
 
@@ -203,14 +203,14 @@ export default function AddPlannerScreen({ navigation, route }) {
                         style={styles.start}
                         onPress={() => setShowStart(true)}
                     >
-                        <Text>{formatTime(start)}</Text>
+                        <FontText>{formatTime(start)}</FontText>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.end}
                         onPress={() => setShowEnd(true)}
                     >
-                        <Text>{formatEnd(end)}</Text>
+                        <FontText>{formatEnd(end)}</FontText>
                     </TouchableOpacity>
 
                 </View>
@@ -219,9 +219,9 @@ export default function AddPlannerScreen({ navigation, route }) {
                 {conflictTask && (
 
                     <View style={styles.conflictBanner}>
-                        <Text style={styles.conflictText}>
+                        <FontText style={styles.conflictText}>
                             ⚠️ เวลาชนกับ "{conflictTask.desc}" ({conflictTask.start}-{conflictTask.end})
-                        </Text>
+                        </FontText>
                     </View>
 
                 )}
@@ -235,9 +235,9 @@ export default function AddPlannerScreen({ navigation, route }) {
                     style={styles.cancelBtn}
                     onPress={isEdit ? deleteTask : () => navigation.goBack()}
                 >
-                    <Text style={styles.cancelText}>
+                    <FontText style={styles.cancelText}>
                         {isEdit ? "Delete" : "Cancel"}
-                    </Text>
+                    </FontText>
                 </TouchableOpacity>
 
 
@@ -249,9 +249,9 @@ export default function AddPlannerScreen({ navigation, route }) {
                     onPress={submit}
                     disabled={!!conflictTask}
                 >
-                    <Text style={styles.submitText}>
+                    <FontText style={styles.submitText}>
                         {isEdit ? "Save" : "Submit"}
-                    </Text>
+                    </FontText>
                 </TouchableOpacity>
 
             </View>
