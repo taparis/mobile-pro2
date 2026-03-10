@@ -15,6 +15,8 @@ const sortTasks = (list) => {
 
     return [...list].sort((a, b) => {
 
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+
         if (!a.date || !b.date) return 0;
 
         const [da, ma, ya] = a.date.split("/").map(Number);
@@ -54,7 +56,7 @@ const groupTasksByMonth = (tasks) => {
 
 export default function ActivityPlannerScreen({ navigation }) {
 
-    const { tasks, removeTask } = useContext(PlannerContext);
+    const { tasks, removeTask, toggleTask } = useContext(PlannerContext);
 
     const groupedTasks = groupTasksByMonth(tasks);
 
@@ -93,15 +95,35 @@ export default function ActivityPlannerScreen({ navigation }) {
                             <View style={styles.card} key={t.id}>
 
                                 <TouchableOpacity
-                                    style={styles.circle}
-                                    onPress={() => confirmDelete(t.id)}
-                                />
+                                    style={[
+                                        styles.circle,
+                                        t.completed && styles.completedCircle
+                                    ]}
+                                    onPress={() => toggleTask(t)}
+                                >
+                                    {t.completed && (
+                                        <Ionicons name="checkmark" size={14} color="#fff" />
+                                    )}
+                                </TouchableOpacity>
 
                                 <View style={{ flex: 1 }}>
 
-                                    <Text style={styles.task}>
-                                        {t.desc}
-                                    </Text>
+                                    <View>
+
+                                        <Text style={[
+                                            styles.task,
+                                            t.completed && styles.completedTask
+                                        ]}>
+                                            {t.desc}
+                                        </Text>
+
+                                        {t.subjectName && (
+                                            <Text style={styles.subject}>
+                                                {t.subjectName}
+                                            </Text>
+                                        )}
+
+                                    </View>
 
                                     <Text style={styles.time}>
                                         {t.date} • {t.start}-{t.end}
@@ -232,6 +254,19 @@ const styles = StyleSheet.create({
         marginTop: 50,
         color: "#999",
         fontSize: 18,
+    },
+    subject: {
+        fontSize: 13,
+        color: "#ff4d8d",
+        fontWeight: "600"
+    },
+    completedCircle: {
+        backgroundColor: "#4CAF50",
+    },
+    completedTask: {
+        textDecorationLine: "line-through",
+        color: "#999",
+        alignItems: "center",
     },
 
 });
