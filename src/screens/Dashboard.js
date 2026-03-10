@@ -196,7 +196,7 @@ const Dashboard = ({ navigation }) => {
 
 
       <View style={styles.cardContainer}>
-        <FontText style={styles.headlabel}>Quick Task</FontText>
+        <FontText style={styles.headlabel}>Task</FontText>
 
 
         <View style={styles.card}>
