@@ -50,11 +50,12 @@ const getFilteredData = (data, range, type = "class") => {
     itemDate.setHours(0, 0, 0, 0);
 
     if (range === "today") {
-      return itemDate.getTime() === now.getTime();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return itemDate.getTime() === todayMidnight.getTime();
     } else if (range === "week") {
-      return itemDate >= now && itemDate <= endOfWeek;
+      return itemDate >= today && itemDate <= endOfWeek;
     } else if (range === "month") {
-      return itemDate >= now && itemDate <= endOfMonth;
+      return itemDate >= today && itemDate <= endOfMonth;
     }
     return true;
   });
@@ -107,7 +108,14 @@ const Dashboard = ({ navigation }) => {
   const nextClass = displayClasses?.item || null;
   const nextDaysUntil = displayClasses?.daysUntil ?? null;
   const nextExam = filteredExams[0] || null;
-  const nextTask = filteredTasks[0] || null;
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    const [da, ma, ya] = a.date.split("/").map(Number);
+    const [db, mb, yb] = b.date.split("/").map(Number);
+    const [ha, mina] = a.start.split(":").map(Number);
+    const [hb, minb] = b.start.split(":").map(Number);
+    return new Date(ya, ma-1, da, ha, mina) - new Date(yb, mb-1, db, hb, minb);
+  });
 
   const getDaysDiff = (dateStr, isTask = false) => {
     const today = new Date();
@@ -200,26 +208,41 @@ const Dashboard = ({ navigation }) => {
       <View style={styles.cardContainer}>
         <FontText style={styles.headlabel}>Your Task</FontText>
         <View style={styles.card}>
-          {!nextTask ? (
+          {sortedTasks.length === 0 ? (
             <View style={styles.emptyRow}>
               <Ionicons name="clipboard-outline" size={20} color="#ffb6c1" />
               <FontText style={styles.emptyText}>ยังไม่มี Task ในช่วงนี้</FontText>
             </View>
           ) : (
-            <View style={styles.taskCard}>
-              <View style={{ flex: 1 }}>
-                <FontText style={styles.taskTitle}>{nextTask.desc}</FontText>
-                <View style={styles.taskRow}>
-                  <Ionicons name="calendar-outline" size={14} color="#ff6d9b" />
-                  <FontText style={styles.taskSubText}>{nextTask.date}</FontText>
+            sortedTasks.map((t, index) => (
+              <View
+                key={t.id}
+                style={[styles.taskCard, index < sortedTasks.length - 1 && { marginBottom: 10 }]}
+              >
+                <View style={{ flex: 1 }}>
+                  <FontText style={[styles.taskTitle, t.completed && styles.completedTask]}>
+                    {t.desc}
+                  </FontText>
+                  {t.subjectName && (
+                    <FontText style={styles.subjectTag}>{t.subjectName}</FontText>
+                  )}
+                  <View style={styles.taskRow}>
+                    <Ionicons name="calendar-outline" size={14} color="#ff6d9b" />
+                    <FontText style={styles.taskSubText}>{t.date}</FontText>
+                  </View>
+                  <View style={styles.taskRow}>
+                    <Ionicons name="time-outline" size={14} color="#ff6d9b" />
+                    <FontText style={styles.taskSubText}>{t.start} - {t.end}</FontText>
+                  </View>
                 </View>
-                <View style={styles.taskRow}>
-                  <Ionicons name="time-outline" size={14} color="#ff6d9b" />
-                  <FontText style={styles.taskSubText}>{nextTask.start} - {nextTask.end}</FontText>
+                <View style={{ alignItems: "center", gap: 6 }}>
+                  <FontText style={styles.daysLabel}>{daysLabel(getDaysDiff(t.date, true))}</FontText>
+                  {t.completed && (
+                    <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
+                  )}
                 </View>
               </View>
-              <FontText style={styles.daysLabel}>{daysLabel(getDaysDiff(nextTask.date, true))}</FontText>
-            </View>
+            ))
           )}
         </View>
       </View>
@@ -327,6 +350,16 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 13,
     color: "#555",
+  },
+  completedTask: {
+    textDecorationLine: "line-through",
+    color: "#aaa",
+  },
+  subjectTag: {
+    fontSize: 12,
+    color: "#ff4d8d",
+    fontWeight: "600",
+    marginBottom: 4,
   },
 });
 
