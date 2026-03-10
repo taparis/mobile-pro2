@@ -7,18 +7,14 @@ import {
     TouchableOpacity,
     Alert
 } from "react-native";
-import { FontText } from "../components/CustomFont";
 import { PlannerContext } from "../context/PlannerContext";
 import { Ionicons } from "@expo/vector-icons";
 
-const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-];
-
 const sortTasks = (list) => {
+
     return [...list].sort((a, b) => {
-        if(!a.date || !b.date || !a.start || !b.start) return 0
+
+        if (!a.date || !b.date) return 0;
 
         const [da, ma, ya] = a.date.split("/").map(Number);
         const [db, mb, yb] = b.date.split("/").map(Number);
@@ -29,94 +25,138 @@ const sortTasks = (list) => {
         const dateA = new Date(ya, ma - 1, da, ha, mina);
         const dateB = new Date(yb, mb - 1, db, hb, minb);
 
-        return dateA - dateB;
+        return dateA.getTime() - dateB.getTime();
+
     });
+
 };
+
+
+const groupTasksByMonth = (tasks) => {
+
+    const grouped = {};
+
+    tasks.forEach(task => {
+
+        if (!grouped[task.month]) {
+            grouped[task.month] = [];
+        }
+
+        grouped[task.month].push(task);
+
+    });
+
+    return grouped;
+
+};
+
 
 export default function ActivityPlannerScreen({ navigation }) {
 
     const { tasks, removeTask } = useContext(PlannerContext);
 
-    const monthsWithTasks = months.filter(m =>
-        tasks.some(t => t.month === m)
-    );
+    const groupedTasks = groupTasksByMonth(tasks);
 
     const confirmDelete = (id) => {
-        Alert.alert("ลบกิจกรรม", "คุณจะลบกิจกรรมนี้หรือไม่ ?",
-            [{text : "ยกเลิก", style : "cancel"},
-                {text : "ยืนยัน", style : "destructive", onPress : () => removeTask(id)}
-            ]
-        )
-    }
 
-const formatData = (dateVal) => {
-    if (!dateVal) return "ไม่ระบุวันที่";
-    
-    const d = dateVal.seconds ? new Date(dateVal.seconds * 1000) : new Date(dateVal);
-    
-    if (isNaN(d.getTime())) return dateVal;
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-};
+        Alert.alert(
+            "ลบกิจกรรม",
+            "คุณจะลบกิจกรรมนี้หรือไม่ ?",
+            [
+                { text: "ยกเลิก", style: "cancel" },
+                {
+                    text: "ยืนยัน",
+                    style: "destructive",
+                    onPress: () => removeTask(id)
+                }
+            ]
+        );
+
+    };
+
 
     return (
+
         <View style={styles.container}>
 
             <ScrollView showsVerticalScrollIndicator={false}>
 
-                {monthsWithTasks.map(month => (
+                {Object.keys(groupedTasks).map(month => (
+
                     <View key={month} style={styles.monthSection}>
 
-                        <FontText style={styles.monthTitle}>{month}</FontText>
+                        <Text style={styles.monthTitle}>{month}</Text>
 
-                        {sortTasks
-                            (tasks.filter(t => t.month === month))
-                            .map((t, index) => (
-                                <View style={styles.card} key={t.id || index}>
+                        {sortTasks(groupedTasks[month]).map(t => (
 
-                                    <TouchableOpacity
-                                        style={styles.circle}
-                                        onPress={() => confirmDelete(t.id || index)}
-                                    />
+                            <View style={styles.card} key={t.id}>
 
-                                    <View style={{ flex: 1 }}>
-                                        <FontText style={styles.task}>{t.desc}</FontText>
-                                        <FontText style={styles.time}>
-                                            {formatData(t.date)}  •  {t.start}-{t.end}
-                                        </FontText>
-                                    </View>
+                                <TouchableOpacity
+                                    style={styles.circle}
+                                    onPress={() => confirmDelete(t.id)}
+                                />
 
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            navigation.navigate("EditPlanner", { task: t })
-                                        }
-                                    >
-                                        <Ionicons name="create-outline" size={22} color="#444" />
-                                    </TouchableOpacity>
+                                <View style={{ flex: 1 }}>
+
+                                    <Text style={styles.task}>
+                                        {t.desc}
+                                    </Text>
+
+                                    <Text style={styles.time}>
+                                        {t.date} • {t.start}-{t.end}
+                                    </Text>
 
                                 </View>
-                            ))}
+
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        navigation.navigate("EditPlanner", { task: t })
+                                    }
+                                >
+                                    <Ionicons
+                                        name="create-outline"
+                                        size={22}
+                                        color="#444"
+                                    />
+                                </TouchableOpacity>
+
+                            </View>
+
+                        ))}
 
                     </View>
+
                 ))}
 
+
                 {tasks.length === 0 && (
-                    <FontText style={styles.noTask}>ไม่มีกิจกรรมตอนนี้</FontText>
+                    <Text style={styles.noTask}>
+                        ไม่มีกิจกรรมตอนนี้
+                    </Text>
                 )}
 
             </ScrollView>
 
+
             <View style={styles.center}>
+
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => navigation.navigate("AddPlanner")}
                 >
-                    <FontText style={styles.buttonText}>Add Task</FontText>
+                    <Text style={styles.buttonText}>
+                        Add Task
+                    </Text>
                 </TouchableOpacity>
+
             </View>
 
         </View>
+
     );
+
 }
+
 
 const styles = StyleSheet.create({
 
@@ -126,15 +166,18 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffffff",
         paddingBottom: 80,
     },
+
     monthSection: {
         marginBottom: 20,
     },
+
     monthTitle: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 10,
         color: "#000000",
     },
+
     card: {
         backgroundColor: "#ffe4ef",
         padding: 15,
@@ -143,6 +186,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
+
     circle: {
         width: 18,
         height: 18,
@@ -150,15 +194,18 @@ const styles = StyleSheet.create({
         backgroundColor: "#ff9ac1",
         marginRight: 12,
     },
+
     task: {
         fontWeight: "bold",
         fontSize: 16,
         marginBottom: 2,
     },
+
     time: {
         color: "#666",
         fontSize: 13,
     },
+
     button: {
         backgroundColor: "#ff4d8d",
         padding: 15,
@@ -166,20 +213,24 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: "45%",
     },
+
     buttonText: {
         color: "#fff",
         fontSize: 18,
         fontWeight: "bold",
     },
+
     center: {
         flexDirection: "row",
         justifyContent: "center",
         marginTop: 10,
     },
+
     noTask: {
         textAlign: "center",
         marginTop: 50,
         color: "#999",
         fontSize: 18,
     },
+
 });

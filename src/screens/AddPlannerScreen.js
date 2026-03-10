@@ -5,13 +5,19 @@ import {
     TextInput,
     StyleSheet,
     TouchableOpacity,
-    Alert,
-    Platform
+    Alert
 } from "react-native";
-import { FontText } from "../components/CustomFont";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { PlannerContext } from "../context/PlannerContext";
-import { auth } from "../service/firebaseconfig";
+
+const toMinutes = (t) => {
+    const d = new Date(t);
+    return d.getHours() * 60 + d.getMinutes();
+};
+
+const isTimeOverlap = (sA, eA, sB, eB) => {
+    return toMinutes(sA) < toMinutes(eB) && toMinutes(sB) < toMinutes(eA);
+};
 
 export default function AddPlannerScreen({ navigation, route }) {
 
@@ -21,7 +27,6 @@ export default function AddPlannerScreen({ navigation, route }) {
     const isEdit = !!editingTask;
 
     const [desc, setDesc] = useState("");
-
     const [date, setDate] = useState(null);
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
@@ -31,21 +36,21 @@ export default function AddPlannerScreen({ navigation, route }) {
     const [showEnd, setShowEnd] = useState(false);
 
     useEffect(() => {
+
         if (editingTask) {
+
             setDesc(editingTask.desc);
 
             const [d, m, y] = editingTask.date.split("/").map(Number);
             const [sh, sm] = editingTask.start.split(":").map(Number);
             const [eh, em] = editingTask.end.split(":").map(Number);
 
-            const dateObj = new Date(y, m - 1, d);
-            const startObj = new Date(y, m - 1, d, sh, sm);
-            const endObj = new Date(y, m - 1, d, eh, em);
+            setDate(new Date(y, m - 1, d));
+            setStart(new Date(y, m - 1, d, sh, sm));
+            setEnd(new Date(y, m - 1, d, eh, em));
 
-            setDate(dateObj);
-            setStart(startObj);
-            setEnd(endObj);
         }
+
     }, []);
 
     const formatDate = d =>
@@ -63,12 +68,18 @@ export default function AddPlannerScreen({ navigation, route }) {
             ? `${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`
             : "End";
 
-    const isOverlap = (newStart, newEnd, newDateStr) => {
-        return tasks.some(t => {
+
+    const getConflictTask = () => {
+
+        if (!date || !start || !end) return null;
+
+        const dateStr = formatDate(date);
+
+        return tasks.find(t => {
 
             if (isEdit && t.id === editingTask.id) return false;
 
-            if (t.date !== newDateStr) return false;
+            if (t.date !== dateStr) return false;
 
             const [d, m, y] = t.date.split("/").map(Number);
             const [sh, sm] = t.start.split(":").map(Number);
@@ -77,104 +88,97 @@ export default function AddPlannerScreen({ navigation, route }) {
             const oldStart = new Date(y, m - 1, d, sh, sm);
             const oldEnd = new Date(y, m - 1, d, eh, em);
 
-            return newStart < oldEnd && newEnd > oldStart;
+            return isTimeOverlap(start, end, oldStart, oldEnd);
+
         });
+
     };
 
+    const conflictTask = getConflictTask();
+
+
     const submit = async () => {
-        const currentUserId = auth.currentUser?.uid
 
         if (!desc || !date || !start || !end) {
-            Alert.alert("Error", "สร้างไร เอาให้ครบก่อน !");
+            Alert.alert("Error", "กรอกข้อมูลให้ครบก่อน");
             return;
         }
 
-        const startDate = new Date(date);
-        startDate.setHours(start.getHours(), start.getMinutes());
-
-        const endDate = new Date(date);
-        endDate.setHours(end.getHours(), end.getMinutes());
-
-        if (startDate < new Date()) {
-            Alert.alert("Error", "จะย้อนเวลารึไง ?");
-            return;
-        }
-
-        if (endDate <= startDate) {
-            Alert.alert("Error", "จบก่อนงานเริ่ม ?");
-            return;
-        }
-
-        const dateStr = formatDate(date);
-
-        if (isOverlap(startDate, endDate, dateStr)) {
-            Alert.alert("Error", "เวลานี้มีกิจกรรมแล้ว!");
-            return;
-        }
-
-
-        if (!currentUserId) {
-            Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่");
+        if (toMinutes(start) >= toMinutes(end)) {
+            Alert.alert("Error", "เวลาเริ่มต้องก่อนเวลาจบ");
             return;
         }
 
         const months = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
         ];
 
         const taskData = {
-            id: editingTask?.id || null,
             desc,
-            date: dateStr,
+            date: formatDate(date),
             start: formatTime(start),
             end: formatEnd(end),
-            month: months[date.getMonth()],
-            timestamp: startDate,
-            userId: currentUserId  // ✅ ใช้ได้แล้ว
+            month: months[date.getMonth()]
         };
 
-        try{
-            const currentUserId = auth.currentUser?.uid
+        try {
 
-            if (!currentUserId) {
-            Alert.alert("Error", "กรุณาเข้าสู่ระบบใหม่");
-            return;
-        }
+            if (isEdit) {
 
-            if(isEdit){
-                await updateTask(taskData.id, taskData)
-            }else {
-                await addTask(taskData)
+                await updateTask({
+                    ...taskData,
+                    id: editingTask.id
+                });
+
+            } else {
+
+                await addTask(taskData);
+
             }
+
             navigation.goBack();
+
         } catch (error) {
-            Alert.alert("Error", "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
+
+            console.log("Save error", error);
+
         }
+
     };
 
+
     const deleteTask = () => {
+
         Alert.alert("Delete", "ลบกิจกรรมนี้ ?", [
             { text: "Cancel" },
             {
                 text: "Delete",
-                onPress: () => {
-                    removeTask(editingTask.id);
+                onPress: async () => {
+
+                    await removeTask(editingTask.id);
+
                     navigation.goBack();
+
                 }
             }
         ]);
+
     };
 
+
     return (
+
         <View style={styles.container}>
+
             <View style={styles.inputContainer}>
 
-                <FontText style={styles.title}>
+                <Text style={styles.title}>
                     {isEdit ? "EDIT" : "NEW"}
-                </FontText>
+                </Text>
 
-                <FontText style={styles.text}>Description</FontText>
+                <Text style={styles.text}>Description</Text>
+
                 <TextInput
                     placeholder="Description"
                     style={styles.input}
@@ -182,48 +186,92 @@ export default function AddPlannerScreen({ navigation, route }) {
                     onChangeText={setDesc}
                 />
 
-                <FontText style={styles.text}>Date</FontText>
-                <TouchableOpacity style={styles.input} onPress={() => setShowDate(true)}>
-                    <FontText>{formatDate(date)}</FontText>
+                <Text style={styles.text}>Date</Text>
+
+                <TouchableOpacity
+                    style={styles.input}
+                    onPress={() => setShowDate(true)}
+                >
+                    <Text>{formatDate(date)}</Text>
                 </TouchableOpacity>
 
-                <FontText style={styles.text}>Time</FontText>
+                <Text style={styles.text}>Time</Text>
+
                 <View style={styles.rowtime}>
-                    <TouchableOpacity style={styles.start} onPress={() => setShowStart(true)}>
-                        <FontText>{formatTime(start)}</FontText>
+
+                    <TouchableOpacity
+                        style={styles.start}
+                        onPress={() => setShowStart(true)}
+                    >
+                        <Text>{formatTime(start)}</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.end} onPress={() => setShowEnd(true)}>
-                        <FontText>{formatEnd(end)}</FontText>
+                    <TouchableOpacity
+                        style={styles.end}
+                        onPress={() => setShowEnd(true)}
+                    >
+                        <Text>{formatEnd(end)}</Text>
                     </TouchableOpacity>
+
                 </View>
+
+
+                {conflictTask && (
+
+                    <View style={styles.conflictBanner}>
+                        <Text style={styles.conflictText}>
+                            ⚠️ เวลาชนกับ "{conflictTask.desc}" ({conflictTask.start}-{conflictTask.end})
+                        </Text>
+                    </View>
+
+                )}
 
             </View>
 
+
             <View style={styles.row}>
+
                 <TouchableOpacity
                     style={styles.cancelBtn}
                     onPress={isEdit ? deleteTask : () => navigation.goBack()}
                 >
-                    <FontText style={{ color: "#FF4D97", fontSize: 20, fontWeight: "bold" }}>
+                    <Text style={styles.cancelText}>
                         {isEdit ? "Delete" : "Cancel"}
-                    </FontText>
+                    </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-                    <FontText style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
+
+
+                <TouchableOpacity
+                    style={[
+                        styles.submitBtn,
+                        conflictTask && styles.disabledButton
+                    ]}
+                    onPress={submit}
+                    disabled={!!conflictTask}
+                >
+                    <Text style={styles.submitText}>
                         {isEdit ? "Save" : "Submit"}
-                    </FontText>
+                    </Text>
                 </TouchableOpacity>
+
             </View>
+
 
             {showDate && (
                 <DateTimePicker
                     value={date || new Date()}
                     mode="date"
-                    display="default"
+                    minimumDate={new Date()}
                     onChange={(e, selected) => {
+
                         setShowDate(false);
-                        if (selected) setDate(selected);
+
+                        if (selected) {
+                            setDate(selected);
+                            setStart(null);
+                            setEnd(null);
+                        }
+
                     }}
                 />
             )}
@@ -246,32 +294,51 @@ export default function AddPlannerScreen({ navigation, route }) {
                     mode="time"
                     is24Hour={true}
                     onChange={(e, selected) => {
+
                         setShowEnd(false);
-                        if (selected) setEnd(selected);
+
+                        if (selected) {
+
+                            if (start && toMinutes(selected) <= toMinutes(start)) {
+                                Alert.alert("Error", "เวลาจบต้องหลังเวลาเริ่ม");
+                                return;
+                            }
+
+                            setEnd(selected);
+
+                        }
+
                     }}
                 />
             )}
 
         </View>
+
     );
+
 }
 
+
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         padding: 20
     },
+
     title: {
         fontSize: 26,
         fontWeight: "bold",
         marginBottom: 10,
         textAlign: "center"
     },
+
     text: {
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 10
     },
+
     input: {
         borderWidth: 1,
         borderColor: "#ccc",
@@ -280,6 +347,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         backgroundColor: "#fff"
     },
+
     start: {
         flex: 1,
         borderWidth: 1,
@@ -289,21 +357,41 @@ const styles = StyleSheet.create({
         marginRight: 10,
         backgroundColor: "#fff"
     },
+
     end: {
         flex: 1,
         borderWidth: 1,
         borderColor: "#ccc",
-        borderRadius: 10, padding: 12,
+        borderRadius: 10,
+        padding: 12,
         backgroundColor: "#fff"
     },
+
     rowtime: {
         flexDirection: "row"
     },
+
+    conflictBanner: {
+        backgroundColor: "#fff3f3",
+        borderWidth: 1,
+        borderColor: "#ff3776",
+        borderRadius: 10,
+        padding: 10,
+        marginTop: 8
+    },
+
+    conflictText: {
+        color: "#ff3776",
+        fontSize: 13,
+        fontWeight: "500"
+    },
+
     row: {
         flexDirection: "row",
         marginTop: 30,
         justifyContent: "center"
     },
+
     cancelBtn: {
         backgroundColor: "#ffb3d3",
         padding: 15,
@@ -312,6 +400,7 @@ const styles = StyleSheet.create({
         width: "40%",
         alignItems: "center"
     },
+
     submitBtn: {
         backgroundColor: "#ff4d8d",
         padding: 15,
@@ -319,10 +408,28 @@ const styles = StyleSheet.create({
         width: "40%",
         alignItems: "center"
     },
+
+    disabledButton: {
+        backgroundColor: "#ccc"
+    },
+
+    cancelText: {
+        color: "#FF4D97",
+        fontSize: 20,
+        fontWeight: "bold"
+    },
+
+    submitText: {
+        color: "#fff",
+        fontSize: 20,
+        fontWeight: "bold"
+    },
+
     inputContainer: {
         padding: 20,
         backgroundColor: "#f3d7e3",
         borderRadius: 40,
         marginTop: 20
-    },
+    }
+
 });
