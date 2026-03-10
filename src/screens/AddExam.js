@@ -80,6 +80,7 @@ const AddExam = ({ navigation }) => {
   const checkConflict = () => {
     if (!form.date || !form.starts || !form.ends) return null;
     return exams.find((e) =>
+      e.code !== form.code &&  // ← เพิ่มบรรทัดนี้
       e.date && e.starts && e.ends &&
       isSameDate(form.date, e.date) &&
       isTimeOverlap(form.starts, form.ends, e.starts, e.ends)
@@ -221,7 +222,7 @@ const AddExam = ({ navigation }) => {
         </View>
 
         {/* Real-time conflict warning */}
-        {conflict && (
+        {conflict && form.date && form.starts && form.ends && (
           <View style={styles.conflictBanner}>
             <FontText style={styles.conflictText}>
               ⚠️ เวลาชนกับ "{conflict.subject}" ({formatTime(conflict.starts)}–{formatTime(conflict.ends)})

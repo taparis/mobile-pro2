@@ -77,9 +77,14 @@ const AddClass = ({ navigation }) => {
 
   // ตรวจ conflict ของ row นี้กับ classes ที่มีอยู่
   const getConflict = (row) => {
-    if (row.dayOfWeek === null || !row.starts || !row.ends) return null;
+    if (!row.starts || !row.ends) return null;
     return classes
-      .filter((c) => c.type !== "exams" && c.dayOfWeek !== undefined && c.starts && c.ends)
+      .filter((c) =>
+        c.type !== "exams" &&
+        c.dayOfWeek !== undefined &&
+        c.starts && c.ends &&
+        c.code !== code  // ← exclude วิชาที่กำลังเพิ่มอยู่
+      )
       .find((c) =>
         c.dayOfWeek === row.dayOfWeek &&
         isTimeOverlap(row.starts, row.ends, c.starts, c.ends)
@@ -239,7 +244,7 @@ const AddClass = ({ navigation }) => {
               </TouchableOpacity>
 
               {/* conflict warning */}
-              {conflict && (
+              {conflict && row.starts && row.ends && (
                 <FontText style={styles.conflictText}>
                   ⚠️ ชนกับ "{conflict.subject}"
                 </FontText>
