@@ -119,8 +119,8 @@ const DetailClass = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Ionicons name="warning-outline" size={40} color="#ff3776" style={{ marginBottom: 8 }} />
-            <FontText style={styles.modalTitle}>ลบรายวิชา</FontText>
-            <FontText style={styles.modalText}>ต้องการลบ "{deleteTarget?.subject}"?</FontText>
+            <FontText style={styles.modalTitle}>ถอนรายวิชา</FontText>
+            <FontText style={styles.modalText}>ต้องการถอน "{deleteTarget?.subject}"?</FontText>
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setDeleteTarget(null)}>
                 <FontText style={styles.cancelBtnText}>ยกเลิก</FontText>
