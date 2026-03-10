@@ -99,7 +99,6 @@ const Dashboard = ({ navigation }) => {
   const { classes = [], exams = [] } = useContext(ClassContext);
   const { tasks = [] } = useContext(PlannerContext);
 
-  // กรองข้อมูลแบบ Reactive ตาม filterMode
   const displayClasses = getNextClass(classes, filterMode);
   const filteredExams = getFilteredData(exams, filterMode, "exam").sort((a, b) => new Date(a.date) - new Date(b.date));
   const filteredTasks = getFilteredData(tasks, filterMode, "task");
@@ -109,7 +108,6 @@ const Dashboard = ({ navigation }) => {
   const nextExam = filteredExams[0] || null;
   const nextTask = filteredTasks[0] || null;
 
-  // คำนวณ daysUntil สำหรับ Exam และ Task แบบ Dynamic
   const getDaysDiff = (dateStr, isTask = false) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
